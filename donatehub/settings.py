@@ -112,8 +112,8 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
-EMAIL_HOST_USER = 'yourgmail@gmail.com'
-EMAIL_HOST_PASSWORD = 'your_16_character_app_password'
+EMAIL_HOST_USER = 'sachinpk.cs23@jecc.ac.in'
+EMAIL_HOST_PASSWORD = 'nmpwgkolonqmoarw'
 
 
 # ================= GEMINI API CONFIG =================

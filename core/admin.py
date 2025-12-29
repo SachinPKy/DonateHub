@@ -4,6 +4,7 @@ from .models import Donation
 
 @admin.register(Donation)
 class DonationAdmin(admin.ModelAdmin):
+    
 
     list_display = (
         'id',

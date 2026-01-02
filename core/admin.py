@@ -4,6 +4,7 @@ from .models import Donation
 
 @admin.register(Donation)
 class DonationAdmin(admin.ModelAdmin):
+    
 
     list_display = (
         'id',
@@ -29,3 +30,4 @@ class DonationAdmin(admin.ModelAdmin):
     list_editable = ('status',)
 
     ordering = ('-created_at',)
+

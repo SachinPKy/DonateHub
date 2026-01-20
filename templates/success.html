@@ -1,79 +1,104 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <title>Donation Successful | DonateHub</title>
 
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
 
     <style>
-        body {
-            background: linear-gradient(to right, #e8f5e9, #ffffff);
-        }
+      body {
+        min-height: 100vh;
+        background: linear-gradient(to right, #e8f5e9, #ffffff);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 15px;
+      }
 
+      .success-card {
+        width: 100%;
+        max-width: 600px;
+        padding: 40px;
+        border-radius: 15px;
+        background: white;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        text-align: center;
+      }
+
+      .success-icon {
+        font-size: 70px;
+        color: #28a745;
+      }
+
+      .btn-custom {
+        margin: 8px;
+      }
+
+      /* ===== MOBILE RESPONSIVE ===== */
+      @media (max-width: 576px) {
         .success-card {
-            max-width: 600px;
-            margin: 100px auto;
-            padding: 40px;
-            border-radius: 15px;
-            background: white;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-            text-align: center;
+          padding: 25px;
         }
 
         .success-icon {
-            font-size: 70px;
-            color: #28a745;
+          font-size: 55px;
         }
 
-        .btn-custom {
-            margin: 10px;
+        h2 {
+          font-size: 1.5rem;
         }
+
+        .lead {
+          font-size: 1rem;
+        }
+
+        .btn {
+          width: 100%;
+          margin: 6px 0;
+        }
+      }
     </style>
-</head>
+  </head>
 
-<body>
+  <body>
+    <div class="success-card">
+      <!-- Success Icon -->
+      <div class="success-icon">✔</div>
 
-<div class="success-card">
+      <h2 class="text-success mt-3">Donation Added Successfully!</h2>
 
-    <!-- Success Icon -->
-    <div class="success-icon">
-        ✔
-    </div>
+      <p class="lead mt-3">
+        Thank you for your generosity. Your donation has been recorded and will
+        be processed by our team.
+      </p>
 
-    <h2 class="text-success mt-3">
-        Donation Added Successfully!
-    </h2>
+      <hr />
 
-    <p class="lead mt-3">
-        Thank you for your generosity. Your donation has been recorded
-        and will be processed by our team.
-    </p>
+      <p>
+        You can track the status of your donation or continue helping by adding
+        more donations.
+      </p>
 
-    <hr>
-
-    <p>
-        You can track the status of your donation or continue helping
-        by adding more donations.
-    </p>
-
-    <!-- Action Buttons -->
-    <a href="/my-donations/" class="btn btn-primary btn-custom">
+      <!-- Action Buttons -->
+      <a href="/my-donations/" class="btn btn-primary btn-custom">
         View My Donations
-    </a>
+      </a>
 
-    <a href="/add/" class="btn btn-outline-success btn-custom">
+      <a href="/add/" class="btn btn-outline-success btn-custom">
         Add Another Donation
-    </a>
+      </a>
 
-    <br><br>
+      <br /><br />
 
-    <a href="/" class="btn btn-link">
-        Back to Home
-    </a>
-
-</div>
-
-</body>
+      <a href="/" class="btn btn-link"> Back to Home </a>
+    </div>
+  </body>
 </html>

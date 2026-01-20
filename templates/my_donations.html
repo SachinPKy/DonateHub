@@ -1,109 +1,137 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
-<head>
+  <head>
     <title>My Donations | DonateHub</title>
-    <meta charset="UTF-8">
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 
     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link
+      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
 
     <style>
-        body {
-            background: #f4f6f9;
-        }
+      body {
+        background: #f4f6f9;
+      }
 
+      .dashboard-title {
+        font-weight: bold;
+      }
+
+      .status-badge {
+        font-size: 0.9rem;
+        padding: 6px 12px;
+      }
+
+      /* ===== MOBILE RESPONSIVE ===== */
+      @media (max-width: 576px) {
         .dashboard-title {
-            font-weight: bold;
+          font-size: 1.5rem;
+          text-align: center;
         }
 
-        .status-badge {
-            font-size: 0.9rem;
-            padding: 6px 12px;
+        table {
+          font-size: 0.85rem;
         }
+
+        th,
+        td {
+          white-space: nowrap;
+        }
+      }
     </style>
-</head>
+  </head>
 
-<body>
-
-<!-- ================= NAVBAR ================= -->
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <div class="container">
+  <body>
+    <!-- ================= NAVBAR ================= -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+      <div class="container">
         <a class="navbar-brand fw-bold" href="/">DonateHub</a>
 
-        <div class="ms-auto">
-            <form action="/accounts/logout/" method="post">
-                {% csrf_token %}
-                <button class="btn btn-outline-light btn-sm">Logout</button>
-            </form>
+        <!-- MOBILE TOGGLER -->
+        <button
+          class="navbar-toggler"
+          type="button"
+          data-bs-toggle="collapse"
+          data-bs-target="#navbarMenu"
+        >
+          <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div
+          class="collapse navbar-collapse justify-content-end"
+          id="navbarMenu"
+        >
+          <form action="/accounts/logout/" method="post" class="mt-3 mt-lg-0">
+            {% csrf_token %}
+            <button class="btn btn-outline-light btn-sm">Logout</button>
+          </form>
         </div>
+      </div>
+    </nav>
+
+    <!-- ================= CONTENT ================= -->
+    <div class="container mt-5 mb-5">
+      <h2 class="dashboard-title text-primary mb-4">My Donations</h2>
+
+      {% if donations %}
+
+      <div class="table-responsive">
+        <table class="table table-bordered table-hover bg-white shadow">
+          <thead class="table-dark text-center">
+            <tr>
+              <th>#</th>
+              <th>Category</th>
+              <th>Description</th>
+              <th>Pickup Date</th>
+              <th>Status</th>
+              <th>Submitted On</th>
+            </tr>
+          </thead>
+
+          <tbody>
+            {% for donation in donations %}
+            <tr>
+              <td class="text-center">{{ forloop.counter }}</td>
+              <td>{{ donation.category }}</td>
+              <td>{{ donation.description }}</td>
+              <td>{{ donation.pickup_date }}</td>
+
+              <td class="text-center">
+                {% if donation.status == "Pending" %}
+                <span class="badge bg-warning status-badge">Pending</span>
+                {% elif donation.status == "Approved" %}
+                <span class="badge bg-primary status-badge">Approved</span>
+                {% elif donation.status == "Picked Up" %}
+                <span class="badge bg-info status-badge">Picked Up</span>
+                {% elif donation.status == "Delivered" %}
+                <span class="badge bg-success status-badge">Delivered</span>
+                {% elif donation.status == "Rejected" %}
+                <span class="badge bg-danger status-badge">Rejected</span>
+                {% endif %}
+              </td>
+
+              <td>{{ donation.created_at|date:"d M Y" }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+      </div>
+
+      {% else %}
+
+      <div class="alert alert-info text-center">
+        You have not made any donations yet.
+        <a href="/add/" class="alert-link">Add a donation</a>.
+      </div>
+
+      {% endif %}
     </div>
-</nav>
 
-<!-- ================= CONTENT ================= -->
-<div class="container mt-5">
-
-    <h2 class="dashboard-title text-primary mb-4">
-        My Donations
-    </h2>
-
-    {% if donations %}
-
-        <div class="table-responsive">
-            <table class="table table-bordered table-hover bg-white shadow">
-
-                <thead class="table-dark">
-                    <tr>
-                        <th>#</th>
-                        <th>Category</th>
-                        <th>Description</th>
-                        <th>Pickup Date</th>
-                        <th>Status</th>
-                        <th>Submitted On</th>
-                    </tr>
-                </thead>
-
-                <tbody>
-                    {% for donation in donations %}
-                        <tr>
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ donation.category }}</td>
-                            <td>{{ donation.description }}</td>
-                            <td>{{ donation.pickup_date }}</td>
-
-                            <td>
-                                {% if donation.status == "Pending" %}
-                                    <span class="badge bg-warning status-badge">Pending</span>
-                                {% elif donation.status == "Approved" %}
-                                    <span class="badge bg-primary status-badge">Approved</span>
-                                {% elif donation.status == "Picked Up" %}
-                                    <span class="badge bg-info status-badge">Picked Up</span>
-                                {% elif donation.status == "Delivered" %}
-                                    <span class="badge bg-success status-badge">Delivered</span>
-                                {% elif donation.status == "Rejected" %}
-                                    <span class="badge bg-danger status-badge">Rejected</span>
-                                {% endif %}
-                            </td>
-
-                            <td>{{ donation.created_at|date:"d M Y" }}</td>
-                        </tr>
-                    {% endfor %}
-                </tbody>
-
-            </table>
-        </div>
-
-    {% else %}
-
-        <div class="alert alert-info">
-            You have not made any donations yet.
-            <a href="/add/" class="alert-link">Add a donation</a>.
-        </div>
-
-    {% endif %}
-
-</div>
-
-</body>
+    <!-- Bootstrap JS (REQUIRED for mobile navbar) -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
+  </body>
 </html>
-

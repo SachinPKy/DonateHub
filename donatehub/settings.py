@@ -1,3 +1,10 @@
+
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+
 from pathlib import Path
 
 # ================= BASE DIRECTORY =================
@@ -5,7 +12,8 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 
 
 # ================= SECURITY =================
-SECRET_KEY = 'django-insecure-donatehub-mini-project-key'
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+
 DEBUG = True
 ALLOWED_HOSTS = []
 
@@ -18,7 +26,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
+    
     'core',
 ]
 
@@ -66,12 +74,18 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'postgres',
-        'USER': 'postgres',
-        'PASSWORD': 'yld1L28ViHe7riHX',
-        'HOST': 'db.brhhgmacrcuzvgaljyxu.supabase.co',
+        'USER': 'postgres.brhhgmacrcuzvgaljyxu',
+        'PASSWORD': os.getenv("DB_PASSWORD"),
+        'HOST': 'aws-1-ap-south-1.pooler.supabase.com',
         'PORT': '5432',
+        'CONN_MAX_AGE': 60,   # ⭐ VERY IMPORTANT
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
     }
 }
+
+
 
 
 # ================= PASSWORD VALIDATION =================
@@ -116,11 +130,12 @@ EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
 
-EMAIL_HOST_USER = 'sachinpk.cs23@jecc.ac.in'
-EMAIL_HOST_PASSWORD = 'nmpwgkolonqmoarw'
+EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
+EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 
 
 # ================= GEMINI API CONFIG =================
 # Used for AI category suggestion, validation, and impact message generation
 
-GEMINI_API_KEY = 'AIzaSyAAr508U1aAX7DfbBrNAOtMrPUxdSsc9j0'
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+

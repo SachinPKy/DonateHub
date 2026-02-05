@@ -64,10 +64,18 @@ WSGI_APPLICATION = 'donatehub.wsgi.application'
 # ================= DATABASE =================
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': 'postgres',
+        'USER': 'postgres',
+        'PASSWORD': 'yld1L28ViHe7riHX',
+        'HOST': 'db.brhhgmacrcuzvgaljyxu.supabase.co',
+        'PORT': '5432',
+        'OPTIONS': {
+            'sslmode': 'require',
+        },
     }
 }
+
 
 
 # ================= PASSWORD VALIDATION =================

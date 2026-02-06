@@ -6,10 +6,7 @@
 
   <!-- FAVICONS -->
   <link rel="icon" href="{% static 'favicon.ico' %}">
-  <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon-16x16.png' %}">
-  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon-32x32.png' %}">
   <link rel="apple-touch-icon" href="{% static 'images/apple-touch-icon.png' %}">
-  <link rel="manifest" href="{% static 'site.webmanifest' %}">
 
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -24,13 +21,16 @@
     body {
       background: #f4f6f9;
     }
+
     .dashboard-title {
       font-weight: bold;
     }
+
     .status-badge {
       font-size: 0.85rem;
       padding: 6px 12px;
     }
+
     @media (max-width: 576px) {
       table {
         font-size: 0.85rem;
@@ -116,15 +116,10 @@
                  class="btn btn-sm btn-outline-primary mt-1">
                 Verify Pickup
               </a>
-
             {% elif donation.status == "Picked Up" %}
               <span class="text-success fw-bold">✔ Collected</span>
-
-            {% elif donation.status == "Rejected" %}
-              <span class="text-muted">—</span>
-
             {% else %}
-              <span class="text-muted">Waiting</span>
+              <span class="text-muted">—</span>
             {% endif %}
           </td>
 

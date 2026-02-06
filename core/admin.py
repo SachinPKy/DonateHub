@@ -1,10 +1,10 @@
 from django.contrib import admin
 from .models import Donation
+import random
 
 
 @admin.register(Donation)
 class DonationAdmin(admin.ModelAdmin):
-    
 
     list_display = (
         'id',
@@ -31,3 +31,13 @@ class DonationAdmin(admin.ModelAdmin):
 
     ordering = ('-created_at',)
 
+    def save_model(self, request, obj, form, change):
+        if change:
+            old_obj = Donation.objects.get(pk=obj.pk)
+
+            # Auto-generate OTP ONLY when approving
+            if old_obj.status != 'Approved' and obj.status == 'Approved':
+                obj.otp = str(random.randint(100000, 999999))
+                obj.otp_verified = False
+
+        super().save_model(request, obj, form, change)

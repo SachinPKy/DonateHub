@@ -1,5 +1,6 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.contrib import messages
 from django.http import JsonResponse
 from django.conf import settings
 from django.core.mail import send_mail
@@ -51,7 +52,7 @@ def add_donation(request):
             pickup_date=request.POST.get('pickup_date')
         )
 
-        # Email confirmation (optional but professional)
+        # Email confirmation (optional)
         if request.user.email:
             send_mail(
                 subject="Donation Submitted Successfully – DonateHub",
@@ -67,9 +68,12 @@ def add_donation(request):
                 fail_silently=True,
             )
 
-        return render(request, 'success.html')
+        # ✅ CHANGE HERE
+        messages.success(request, "Donation added successfully.")
+        return redirect('/my-donations/')
 
     return render(request, 'add_donation.html')
+
 
 
 # ================= MY DONATIONS =================
@@ -82,21 +86,51 @@ def my_donations(request):
     return render(request, 'my_donations.html', {'donations': donations})
 
 
-# ================= GEMINI AI CATEGORY (GET BASED) =================
+# ================= OTP VERIFICATION =================
+@login_required
+def verify_otp(request, donation_id):
+    # Prevent admin access
+    if request.user.is_superuser:
+        return redirect('/admin/')
+
+    donation = get_object_or_404(Donation, id=donation_id)
+
+    # OTP allowed only after approval
+    if donation.status != "Approved":
+        messages.error(request, "Donation is not approved yet.")
+        return redirect('/my-donations/')
+
+    if request.method == "POST":
+        entered_otp = request.POST.get("otp")
+
+        if entered_otp == donation.otp:
+            donation.otp_verified = True
+            donation.status = "Picked Up"
+            donation.save()
+
+            messages.success(request, "OTP verified. Donation picked up successfully.")
+            return render(request, "success.html")
+        else:
+            messages.error(request, "Invalid OTP. Please try again.")
+
+    return render(request, "verify_otp.html", {"donation": donation})
+
+
+# ================= GEMINI AI CATEGORY =================
 def ai_category(request):
     description = request.GET.get('description', '').lower()
 
-    # -------- RULE-BASED FALLBACK (ALWAYS SAFE) --------
+    # -------- RULE-BASED FALLBACK --------
     fallback = "Household Items"
-    if "book" in description or "textbook" in description or "notebook" in description:
+    if "book" in description or "textbook" in description:
         fallback = "Books"
     elif "toy" in description:
         fallback = "Toys"
-    elif "laptop" in description or "mobile" in description or "charger" in description:
+    elif "laptop" in description or "mobile" in description:
         fallback = "Electronics"
-    elif "shoe" in description or "slipper" in description:
+    elif "shoe" in description:
         fallback = "Footwear"
-    elif "shirt" in description or "pant" in description or "jacket" in description:
+    elif "shirt" in description or "pant" in description:
         fallback = "Clothes"
     elif "table" in description or "chair" in description:
         fallback = "Furniture"
@@ -130,7 +164,6 @@ def ai_category(request):
                 return JsonResponse({"category": categories[key]})
 
     except Exception as e:
-        # Gemini failure should NEVER break the system
         print("Gemini failed, using fallback:", e)
 
     return JsonResponse({"category": fallback})

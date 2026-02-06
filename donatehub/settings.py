@@ -1,11 +1,9 @@
-
-from dotenv import load_dotenv
-import os
-
-load_dotenv()
-
-
 from pathlib import Path
+import os
+from dotenv import load_dotenv
+
+# ================= LOAD ENV =================
+load_dotenv()
 
 # ================= BASE DIRECTORY =================
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -15,6 +13,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
 
 DEBUG = True
+
 ALLOWED_HOSTS = []
 
 
@@ -26,7 +25,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    
+
     'core',
 ]
 
@@ -51,7 +50,7 @@ ROOT_URLCONF = 'donatehub.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],  # optional global templates
+        'DIRS': [BASE_DIR / 'templates'],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -69,7 +68,7 @@ TEMPLATES = [
 WSGI_APPLICATION = 'donatehub.wsgi.application'
 
 
-# ================= DATABASE =================
+# ================= DATABASE (SUPABASE - SAFE) =================
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
@@ -78,14 +77,12 @@ DATABASES = {
         'PASSWORD': os.getenv("DB_PASSWORD"),
         'HOST': 'aws-1-ap-south-1.pooler.supabase.com',
         'PORT': '5432',
-        'CONN_MAX_AGE': 60,   # ⭐ VERY IMPORTANT
+        'CONN_MAX_AGE': 60,
         'OPTIONS': {
             'sslmode': 'require',
         },
     }
 }
-
-
 
 
 # ================= PASSWORD VALIDATION =================
@@ -99,7 +96,9 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # ================= INTERNATIONALIZATION =================
 LANGUAGE_CODE = 'en-us'
+
 TIME_ZONE = 'Asia/Kolkata'
+
 USE_I18N = True
 USE_TZ = True
 
@@ -135,7 +134,4 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 
 
 # ================= GEMINI API CONFIG =================
-# Used for AI category suggestion, validation, and impact message generation
-
 GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
-

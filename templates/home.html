@@ -3,11 +3,6 @@
 <html lang="en">
 <head>
     <title>DonateHub | Community Donation Platform</title>
-    <link rel="icon" href="{% static 'favicon.ico' %}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon-16x16.png' %}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon-32x32.png' %}">
-    <link rel="apple-touch-icon" href="{% static 'images/apple-touch-icon.png' %}">
-    <link rel="manifest" href="{% static 'site.webmanifest' %}">
 
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -158,7 +153,8 @@
     </div>
 </section>
 
-<!-- ================= HOW TO USE ================= -->
+<!-- ================= HOW TO USE / MERITS OF DONATING ================= -->
+{% if not user.is_authenticated %}
 <section class="container my-5">
     <h2 class="text-center mb-4">How DonateHub Works</h2>
 
@@ -194,6 +190,43 @@
 
     </div>
 </section>
+{% else %}
+<section class="container my-5">
+    <h2 class="text-center mb-4">Merits of Donating</h2>
+
+    <div class="row text-center">
+
+        <div class="col-md-3 mb-4">
+            <div class="card p-4 shadow h-100">
+                <h5 class="text-primary">Make a Difference</h5>
+                <p>Your donations directly impact lives and create positive change in communities.</p>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="card p-4 shadow h-100">
+                <h5 class="text-primary">Tax Benefits</h5>
+                <p>Charitable donations may qualify for tax deductions, reducing your taxable income.</p>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="card p-4 shadow h-100">
+                <h5 class="text-primary">Personal Fulfillment</h5>
+                <p>Experience the joy and satisfaction that comes from helping others in need.</p>
+            </div>
+        </div>
+
+        <div class="col-md-3 mb-4">
+            <div class="card p-4 shadow h-100">
+                <h5 class="text-primary">Build Community</h5>
+                <p>Strengthen social bonds and inspire others to contribute to worthy causes.</p>
+            </div>
+        </div>
+
+    </div>
+</section>
+{% endif %}
 
 <!-- ================= FOOTER ================= -->
 <footer class="text-center p-3 mt-5">

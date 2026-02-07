@@ -5,6 +5,7 @@ from django.http import JsonResponse
 from django.conf import settings
 from django.core.mail import send_mail
 
+from decimal import Decimal
 import google.generativeai as genai
 
 from .models import Donation
@@ -48,21 +49,21 @@ def add_donation(request):
         description = request.POST.get('description')
         pickup_date = request.POST.get('pickup_date')
         amount = request.POST.get('amount')
-
         photo = request.FILES.get("photo")
-        
-        # ✅ IMPORTANT FIX: handle missing amount
+
+        # Handle missing or empty amount
         if not amount or amount.strip() == "":
-            amount = 0
+            amount = Decimal("0.00")
+        else:
+            amount = Decimal(amount)
 
         donation = Donation.objects.create(
             donor=request.user,
             category=category,
             description=description,
             pickup_date=pickup_date,
-            amount=amount,        # ✅ FIXED
-            status="Pending"
-
+            amount=amount,
+            status="Pending",
             photo=photo
         )
 
@@ -119,7 +120,10 @@ def verify_otp(request, donation_id):
             donation.status = "Picked Up"
             donation.save()
 
-            messages.success(request, "OTP verified. Donation picked up successfully.")
+            messages.success(
+                request,
+                "OTP verified. Donation picked up successfully."
+            )
             return render(request, "success.html")
         else:
             messages.error(request, "Invalid OTP. Please try again.")
@@ -170,11 +174,11 @@ def ai_category(request):
             "household": "Household Items",
         }
 
-        for key in categories:
+        for key, value in categories.items():
             if key in ai_text:
-                return JsonResponse({"category": categories[key]})
+                return JsonResponse({"category": value})
 
     except Exception as e:
         print("Gemini failed, using fallback:", e)
 
-    return JsonResponse({"category": fallback})   
+    return JsonResponse({"category": fallback})

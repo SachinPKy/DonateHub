@@ -5,7 +5,8 @@ from .views import (
     add_donation,
     my_donations,
     ai_category,
-    verify_otp,          # 👈 ADD THIS
+    verify_otp,
+    download_receipt,
 )
 
 urlpatterns = [
@@ -16,6 +17,9 @@ urlpatterns = [
 
     # OTP verification
     path('verify-otp/<int:donation_id>/', verify_otp, name='verify_otp'),
+
+    # PDF receipt download
+    path('receipt/<int:donation_id>/pdf/', download_receipt, name='receipt_pdf'),
 
     # AI endpoint (GET)
     path('ai-category/', ai_category, name='ai_category'),

@@ -1,236 +1,176 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Add Donation | DonateHub</title>
+from django.shortcuts import render, redirect, get_object_or_404
+from django.contrib.auth.decorators import login_required
+from django.contrib import messages
+from django.http import JsonResponse
+from django.conf import settings
+from django.core.mail import send_mail
 
-    <link rel="icon" href="{% static 'favicon.ico' %}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon-16x16.png' %}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon-32x32.png' %}">
-    <link rel="apple-touch-icon" href="{% static 'images/apple-touch-icon.png' %}">
-    <link rel="manifest" href="{% static 'site.webmanifest' %}">
+import google.generativeai as genai
 
-    <link
-      href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
-      rel="stylesheet"
-    />
+from .models import Donation
+from .forms import RegisterForm
 
-    <style>
-      body {
-        background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)),
-          url("{% static 'images/bg.png' %}");
-        background-size: cover;
-        background-position: center;
-        background-attachment: fixed;
-        min-height: 100vh;
-        padding: 15px;
-      }
 
-      .donation-card {
-        max-width: 650px;
-        margin: 70px auto;
-        padding: 35px;
-        border-radius: 18px;
-        background: rgba(255, 255, 255, 0.96);
-        box-shadow: 0 10px 35px rgba(0, 0, 0, 0.3);
-      }
+# ================= GEMINI CONFIG =================
+genai.configure(api_key=settings.GEMINI_API_KEY)
+model = genai.GenerativeModel("models/gemini-2.5-flash")
 
-      .donation-title {
-        font-weight: bold;
-        color: #0d6efd;
-      }
 
-      .ai-btn {
-        font-size: 0.9rem;
-      }
-    </style>
-  </head>
+# ================= HOME =================
+def home(request):
+    if request.user.is_authenticated and request.user.is_superuser:
+        return redirect('/admin/')
+    return render(request, 'home.html')
 
-  <body>
-    <div class="container">
-      <div class="donation-card">
-        <h3 class="text-center donation-title mb-3">Add Donation</h3>
 
-        <p class="text-center text-muted mb-4">
-          Help communities by donating reusable items such as clothes, books,
-          toys, and essential supplies.
-        </p>
+# ================= REGISTER =================
+def register(request):
+    if request.user.is_authenticated:
+        return redirect('/')
 
-        <!-- IMPORTANT: enctype added -->
-        <form method="post" enctype="multipart/form-data">
-          {% csrf_token %}
+    form = RegisterForm(request.POST or None)
+    if form.is_valid():
+        form.save()
+        return redirect('/accounts/login/')
 
-          <!-- CATEGORY -->
-          <div class="mb-3">
-            <label class="form-label">Donation Category</label>
-            <input
-              type="text"
-              class="form-control"
-              name="category"
-              id="id_category"
-              required
-            />
-          </div>
+    return render(request, 'register.html', {'form': form})
 
-          <!-- DESCRIPTION -->
-          <div class="mb-3">
-            <label class="form-label">Donation Description</label>
-            <textarea
-              class="form-control"
-              name="description"
-              id="id_description"
-              rows="4"
-              required
-            ></textarea>
 
-            <button
-              type="button"
-              class="btn btn-info btn-sm mt-2 ai-btn"
-              onclick="getCategory()"
-            >
-              🤖 Suggest Category (AI)
-            </button>
+# ================= ADD DONATION =================
+@login_required
+def add_donation(request):
+    # Prevent admin from donating
+    if request.user.is_superuser:
+        return redirect('/admin/')
 
-            <button
-              type="button"
-              class="btn btn-warning btn-sm mt-2 ai-btn"
-              onclick="getLocation()"
-            >
-              📍 Add Location
-            </button>
-          </div>
+    if request.method == "POST":
+        category = request.POST.get('category')
+        description = request.POST.get('description')
+        pickup_date = request.POST.get('pickup_date')
+        amount = request.POST.get('amount')
 
-          <!-- LOCATION -->
-          <div class="mb-3">
-            <label class="form-label">Pickup Location</label>
-            <input
-              type="text"
-              class="form-control"
-              name="location"
-              id="id_location"
-              readonly
-            />
-          </div>
+        # ✅ IMPORTANT FIX: handle missing amount
+        if not amount or amount.strip() == "":
+            amount = 0
 
-          <!-- ================= PHOTO UPLOAD (NEW) ================= -->
-          <div class="mb-3">
-            <label class="form-label">Upload Item Photo</label>
+        donation = Donation.objects.create(
+            donor=request.user,
+            category=category,
+            description=description,
+            pickup_date=pickup_date,
+            amount=amount,        # ✅ FIXED
+            status="Pending"
+        )
 
-            <!-- Desktop -->
-            <div
-              id="drop-area"
-              class="border border-2 rounded p-3 text-center"
-              style="border-style: dashed; display: none;"
-            >
-              <p class="mb-1">📂 Drag & drop image here</p>
-              <p class="text-muted">or</p>
-              <label class="btn btn-outline-primary btn-sm">
-                Choose Image
-                <input
-                  type="file"
-                  name="photo"
-                  id="photoInput"
-                  accept="image/*"
-                  hidden
-                />
-              </label>
-            </div>
+        # ================= EMAIL CONFIRMATION =================
+        if request.user.email:
+            send_mail(
+                subject="Donation Submitted Successfully – DonateHub",
+                message=(
+                    f"Hello {request.user.username},\n\n"
+                    f"Thank you for your donation.\n\n"
+                    f"Category: {donation.category}\n"
+                    f"Amount: ₹{donation.amount}\n"
+                    f"Pickup Date: {donation.pickup_date}\n\n"
+                    f"Regards,\nDonateHub Team"
+                ),
+                from_email=None,
+                recipient_list=[request.user.email],
+                fail_silently=True,
+            )
 
-            <!-- Mobile -->
-            <div id="mobile-upload" style="display: none;">
-              <input
-                type="file"
-                class="form-control"
-                name="photo"
-                id="photoInputMobile"
-                accept="image/*"
-                capture="environment"
-              />
-              <small class="text-muted">
-                Take photo or choose from gallery
-              </small>
-            </div>
+        messages.success(request, "Donation added successfully.")
+        return redirect('/my-donations/')
 
-            <img
-              id="preview"
-              class="img-fluid mt-3 rounded"
-              style="max-height: 220px; display: none;"
-            />
-          </div>
+    return render(request, 'add_donation.html')
 
-          <!-- PICKUP DATE -->
-          <div class="mb-3">
-            <label class="form-label">Pickup Date</label>
-            <input
-              type="date"
-              class="form-control"
-              name="pickup_date"
-              required
-            />
-          </div>
 
-          <button type="submit" class="btn btn-success w-100">
-            Submit Donation
-          </button>
-        </form>
-      </div>
-    </div>
+# ================= MY DONATIONS =================
+@login_required
+def my_donations(request):
+    if request.user.is_superuser:
+        return redirect('/admin/')
 
-    <!-- ================= SCRIPTS ================= -->
-    <script>
-      function getCategory() {
-        const description = document.getElementById("id_description").value;
-        fetch("{% url 'ai_category' %}?description=" + encodeURIComponent(description))
-          .then((res) => res.json())
-          .then((data) => {
-            document.getElementById("id_category").value = data.category;
-          });
-      }
+    donations = Donation.objects.filter(donor=request.user)
+    return render(request, 'my_donations.html', {'donations': donations})
 
-      function getLocation() {
-        navigator.geolocation.getCurrentPosition((pos) => {
-          document.getElementById("id_location").value =
-            "Lat: " + pos.coords.latitude + ", Lng: " + pos.coords.longitude;
-        });
-      }
 
-      /* PHOTO UPLOAD LOGIC */
-      const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
-      const dropArea = document.getElementById("drop-area");
-      const mobileUpload = document.getElementById("mobile-upload");
-      const preview = document.getElementById("preview");
+# ================= OTP VERIFICATION =================
+@login_required
+def verify_otp(request, donation_id):
+    if request.user.is_superuser:
+        return redirect('/admin/')
 
-      let input;
+    donation = get_object_or_404(Donation, id=donation_id)
 
-      if (isMobile) {
-        mobileUpload.style.display = "block";
-        input = document.getElementById("photoInputMobile");
-      } else {
-        dropArea.style.display = "block";
-        input = document.getElementById("photoInput");
-      }
+    if donation.status != "Approved":
+        messages.error(request, "Donation is not approved yet.")
+        return redirect('/my-donations/')
 
-      input.addEventListener("change", () => {
-        const file = input.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = () => {
-          preview.src = reader.result;
-          preview.style.display = "block";
-        };
-        reader.readAsDataURL(file);
-      });
+    if request.method == "POST":
+        entered_otp = request.POST.get("otp")
 
-      if (!isMobile) {
-        dropArea.addEventListener("dragover", (e) => e.preventDefault());
-        dropArea.addEventListener("drop", (e) => {
-          e.preventDefault();
-          input.files = e.dataTransfer.files;
-          input.dispatchEvent(new Event("change"));
-        });
-      }
-    </script>
-  </body>
-</html>
+        if entered_otp == donation.otp:
+            donation.otp_verified = True
+            donation.status = "Picked Up"
+            donation.save()
+
+            messages.success(request, "OTP verified. Donation picked up successfully.")
+            return render(request, "success.html")
+        else:
+            messages.error(request, "Invalid OTP. Please try again.")
+
+    return render(request, "verify_otp.html", {"donation": donation})
+
+
+# ================= GEMINI AI CATEGORY =================
+def ai_category(request):
+    description = request.GET.get('description', '').lower()
+
+    # -------- RULE-BASED FALLBACK --------
+    fallback = "Household Items"
+    if "book" in description:
+        fallback = "Books"
+    elif "toy" in description:
+        fallback = "Toys"
+    elif "laptop" in description or "mobile" in description:
+        fallback = "Electronics"
+    elif "shoe" in description:
+        fallback = "Footwear"
+    elif "shirt" in description or "pant" in description:
+        fallback = "Clothes"
+    elif "table" in description or "chair" in description:
+        fallback = "Furniture"
+
+    # -------- GEMINI AI --------
+    try:
+        prompt = (
+            "Choose ONE category from this list ONLY:\n"
+            "Clothes, Books, Toys, Electronics, Furniture, Footwear, "
+            "Educational Materials, Household Items.\n\n"
+            f"Description: {description}\n"
+            "Return only the category name."
+        )
+
+        response = model.generate_content(prompt)
+        ai_text = response.text.lower()
+
+        categories = {
+            "clothes": "Clothes",
+            "books": "Books",
+            "toys": "Toys",
+            "electronics": "Electronics",
+            "furniture": "Furniture",
+            "footwear": "Footwear",
+            "educational": "Educational Materials",
+            "household": "Household Items",
+        }
+
+        for key in categories:
+            if key in ai_text:
+                return JsonResponse({"category": categories[key]})
+
+    except Exception as e:
+        print("Gemini failed, using fallback:", e)
+
+    return JsonResponse({"category": fallback})   

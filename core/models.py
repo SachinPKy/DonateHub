@@ -2,6 +2,7 @@ from django.db import models
 from django.contrib.auth.models import User
 import random
 
+
 class Donation(models.Model):
 
     STATUS_CHOICES = [
@@ -15,7 +16,20 @@ class Donation(models.Model):
     donor = models.ForeignKey(User, on_delete=models.CASCADE)
     category = models.CharField(max_length=100)
     description = models.TextField()
+
+    amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0
+    )
+
     pickup_date = models.DateField()
+
+    # ✅ FIX FOR CURRENT ERROR
+    receipt_generated_at = models.DateTimeField(
+        null=True,
+        blank=True
+    )
 
     otp = models.CharField(max_length=6, blank=True, null=True)
     otp_verified = models.BooleanField(default=False)
@@ -29,7 +43,8 @@ class Donation(models.Model):
     created_at = models.DateTimeField(auto_now_add=True)
 
     def generate_otp(self):
-        self.otp = str(random.randint(100000, 999999))
+        if not self.otp:
+            self.otp = str(random.randint(100000, 999999))
 
     def __str__(self):
         return f"{self.category} - {self.status}"

@@ -53,8 +53,14 @@ def add_donation(request):
         description = request.POST.get('description')
         pickup_date = request.POST.get('pickup_date')
         amount = request.POST.get('amount')
+<<<<<<< HEAD
         photo = request.FILES.get("photo")
 
+=======
+
+        
+        # ✅ IMPORTANT FIX: handle missing amount
+>>>>>>> f7b4d66eb9f0791ea435baec2528837a66bffb89
         if not amount or amount.strip() == "":
             amount = Decimal("0.00")
         else:
@@ -65,9 +71,14 @@ def add_donation(request):
             category=category,
             description=description,
             pickup_date=pickup_date,
+<<<<<<< HEAD
             amount=amount,
             status="Pending",
             photo=photo
+=======
+            amount=amount,        # ✅ FIXED
+            status="Pending"
+>>>>>>> f7b4d66eb9f0791ea435baec2528837a66bffb89
         )
 
         # Email confirmation

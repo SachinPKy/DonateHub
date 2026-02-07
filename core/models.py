@@ -17,9 +17,6 @@ class Donation(models.Model):
     category = models.CharField(max_length=100)
     description = models.TextField()
 
-    # 🔹 ADD LOCATION HERE
-    location = models.CharField(max_length=255)
-
     amount = models.DecimalField(
         max_digits=10,
         decimal_places=2,
@@ -28,13 +25,7 @@ class Donation(models.Model):
 
     pickup_date = models.DateField()
 
-    # 🔹 ADD PHOTO HERE
-    photo = models.ImageField(
-        upload_to="donations/",
-        null=True,
-        blank=True
-    )
-
+    # ✅ FIX FOR CURRENT ERROR
     receipt_generated_at = models.DateTimeField(
         null=True,
         blank=True
@@ -56,4 +47,4 @@ class Donation(models.Model):
             self.otp = str(random.randint(100000, 999999))
 
     def __str__(self):
-        return f"{self.category} - {self.status}"
+        return f"{self.category} - {self.status}" 

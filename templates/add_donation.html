@@ -5,11 +5,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Add Donation | DonateHub</title>
+
     <link rel="icon" href="{% static 'favicon.ico' %}">
-  <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon-16x16.png' %}">
-  <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon-32x32.png' %}">
-  <link rel="apple-touch-icon" href="{% static 'images/apple-touch-icon.png' %}">
-  <link rel="manifest" href="{% static 'site.webmanifest' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicon-16x16.png' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicon-32x32.png' %}">
+    <link rel="apple-touch-icon" href="{% static 'images/apple-touch-icon.png' %}">
+    <link rel="manifest" href="{% static 'site.webmanifest' %}">
 
     <!-- Bootstrap CSS -->
     <link
@@ -28,7 +29,6 @@
         padding: 15px;
       }
 
-      /* Main Card */
       .donation-card {
         max-width: 650px;
         margin: 70px auto;
@@ -47,7 +47,6 @@
         font-size: 0.9rem;
       }
 
-      /* ===== MOBILE OPTIMIZATION ===== */
       @media (max-width: 576px) {
         body {
           padding: 10px;
@@ -125,6 +124,28 @@
             >
               🤖 Suggest Category (AI)
             </button>
+
+            <!-- ADD LOCATION BUTTON -->
+            <button
+              type="button"
+              class="btn btn-warning btn-sm mt-2 ai-btn"
+              onclick="getLocation()"
+            >
+              📍 Add Location
+            </button>
+          </div>
+
+          <!-- LOCATION FIELD -->
+          <div class="mb-3">
+            <label class="form-label">Pickup Location</label>
+            <input
+              type="text"
+              class="form-control"
+              name="location"
+              id="id_location"
+              placeholder="Click 'Add Location' to select pickup location"
+              readonly
+            />
           </div>
 
           <!-- PICKUP DATE -->
@@ -146,7 +167,7 @@
       </div>
     </div>
 
-    <!-- ================= AI FETCH SCRIPT ================= -->
+    <!-- ================= AI + LOCATION SCRIPT ================= -->
     <script>
       function getCategory() {
         const description = document
@@ -169,6 +190,26 @@
           .catch(() => {
             alert("AI service unavailable. Please enter category manually.");
           });
+      }
+
+      function getLocation() {
+        if (!navigator.geolocation) {
+          alert("Geolocation is not supported by your browser.");
+          return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+          (position) => {
+            const lat = position.coords.latitude.toFixed(6);
+            const lon = position.coords.longitude.toFixed(6);
+
+            document.getElementById("id_location").value =
+              "Latitude: " + lat + ", Longitude: " + lon;
+          },
+          () => {
+            alert("Unable to retrieve location. Please allow location access.");
+          }
+        );
       }
     </script>
   </body>

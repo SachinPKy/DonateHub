@@ -49,6 +49,8 @@ def add_donation(request):
         pickup_date = request.POST.get('pickup_date')
         amount = request.POST.get('amount')
 
+        photo = request.FILES.get("photo")
+        
         # ✅ IMPORTANT FIX: handle missing amount
         if not amount or amount.strip() == "":
             amount = 0
@@ -60,6 +62,8 @@ def add_donation(request):
             pickup_date=pickup_date,
             amount=amount,        # ✅ FIXED
             status="Pending"
+
+            photo=photo
         )
 
         # ================= EMAIL CONFIRMATION =================

@@ -1,14 +1,19 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseForbidden
 from django.conf import settings
 from django.core.mail import send_mail
+from django.utils import timezone
+import logging
 
 import google.generativeai as genai
 
 from .models import Donation
 from .forms import RegisterForm
+from .utils.receipt_pdf import render_to_pdf
+
+logger = logging.getLogger(__name__)
 
 
 # ================= GEMINI CONFIG =================
@@ -174,3 +179,44 @@ def ai_category(request):
         print("Gemini failed, using fallback:", e)
 
     return JsonResponse({"category": fallback})
+
+
+# ================= DOWNLOAD RECEIPT (PDF) =================
+@login_required
+def download_receipt(request, donation_id):
+    """
+    Generate and download a PDF receipt for a donation.
+    Only the donor who made the donation can download their receipt.
+    """
+    logger.info(f"[DOWNLOAD-RECEIPT] User {request.user.username} requesting receipt for donation_id={donation_id}")
+    
+    # Get donation or return 404
+    donation = get_object_or_404(Donation, id=donation_id)
+    logger.info(f"[DOWNLOAD-RECEIPT] Donation found: {donation.category} - {donation.status}")
+    
+    # SECURITY: Ensure only the donor can download their own receipt
+    if donation.donor != request.user:
+        logger.warning(f"[DOWNLOAD-RECEIPT] ACCESS DENIED: User {request.user.username} tried to download donation {donation_id} owned by {donation.donor.username}")
+        return HttpResponseForbidden("You are not authorized to download this receipt.")
+    
+    logger.info(f"[DOWNLOAD-RECEIPT] Access granted for user {request.user.username}")
+    
+    # Prepare context for PDF template
+    context = {
+        'donation': donation,
+        'donation_id': donation.id,
+        'generated_date': timezone.now(),
+    }
+    
+    logger.info(f"[DOWNLOAD-RECEIPT] Context prepared, generating PDF...")
+    
+    # Generate and return PDF
+    response = render_to_pdf('receipt.html', context)
+    
+    # Update receipt_generated_at timestamp if needed
+    donation.receipt_generated_at = timezone.now()
+    donation.save(update_fields=['receipt_generated_at'])
+    
+    logger.info(f"[DOWNLOAD-RECEIPT] PDF generated and returned successfully")
+    
+    return response

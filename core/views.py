@@ -18,7 +18,6 @@ model = genai.GenerativeModel("models/gemini-2.5-flash")
 
 # ================= HOME =================
 def home(request):
-    # Admin users should directly use admin panel
     if request.user.is_authenticated and request.user.is_superuser:
         return redirect('/admin/')
     return render(request, 'home.html')
@@ -40,19 +39,30 @@ def register(request):
 # ================= ADD DONATION =================
 @login_required
 def add_donation(request):
-    # Prevent admin from donating as normal user
+    # Prevent admin from donating
     if request.user.is_superuser:
         return redirect('/admin/')
 
     if request.method == "POST":
+        category = request.POST.get('category')
+        description = request.POST.get('description')
+        pickup_date = request.POST.get('pickup_date')
+        amount = request.POST.get('amount')
+
+        # ✅ IMPORTANT FIX: handle missing amount
+        if not amount or amount.strip() == "":
+            amount = 0
+
         donation = Donation.objects.create(
             donor=request.user,
-            category=request.POST.get('category'),
-            description=request.POST.get('description'),
-            pickup_date=request.POST.get('pickup_date')
+            category=category,
+            description=description,
+            pickup_date=pickup_date,
+            amount=amount,        # ✅ FIXED
+            status="Pending"
         )
 
-        # Email confirmation (optional)
+        # ================= EMAIL CONFIRMATION =================
         if request.user.email:
             send_mail(
                 subject="Donation Submitted Successfully – DonateHub",
@@ -60,6 +70,7 @@ def add_donation(request):
                     f"Hello {request.user.username},\n\n"
                     f"Thank you for your donation.\n\n"
                     f"Category: {donation.category}\n"
+                    f"Amount: ₹{donation.amount}\n"
                     f"Pickup Date: {donation.pickup_date}\n\n"
                     f"Regards,\nDonateHub Team"
                 ),
@@ -68,12 +79,10 @@ def add_donation(request):
                 fail_silently=True,
             )
 
-        # ✅ CHANGE HERE
         messages.success(request, "Donation added successfully.")
         return redirect('/my-donations/')
 
     return render(request, 'add_donation.html')
-
 
 
 # ================= MY DONATIONS =================
@@ -89,13 +98,11 @@ def my_donations(request):
 # ================= OTP VERIFICATION =================
 @login_required
 def verify_otp(request, donation_id):
-    # Prevent admin access
     if request.user.is_superuser:
         return redirect('/admin/')
 
     donation = get_object_or_404(Donation, id=donation_id)
 
-    # OTP allowed only after approval
     if donation.status != "Approved":
         messages.error(request, "Donation is not approved yet.")
         return redirect('/my-donations/')
@@ -122,7 +129,7 @@ def ai_category(request):
 
     # -------- RULE-BASED FALLBACK --------
     fallback = "Household Items"
-    if "book" in description or "textbook" in description:
+    if "book" in description:
         fallback = "Books"
     elif "toy" in description:
         fallback = "Toys"

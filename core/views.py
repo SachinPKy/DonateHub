@@ -1,15 +1,20 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
-from django.http import JsonResponse
+from django.http import JsonResponse, HttpResponseForbidden
 from django.conf import settings
 from django.core.mail import send_mail
+from django.utils import timezone
+import logging
 
 from decimal import Decimal
 import google.generativeai as genai
 
 from .models import Donation
 from .forms import RegisterForm
+from .utils.receipt_pdf import render_to_pdf
+
+logger = logging.getLogger(__name__)
 
 
 # ================= GEMINI CONFIG =================
@@ -40,7 +45,6 @@ def register(request):
 # ================= ADD DONATION =================
 @login_required
 def add_donation(request):
-    # Prevent admin from donating
     if request.user.is_superuser:
         return redirect('/admin/')
 
@@ -51,7 +55,6 @@ def add_donation(request):
         amount = request.POST.get('amount')
         photo = request.FILES.get("photo")
 
-        # Handle missing or empty amount
         if not amount or amount.strip() == "":
             amount = Decimal("0.00")
         else:
@@ -67,7 +70,7 @@ def add_donation(request):
             photo=photo
         )
 
-        # ================= EMAIL CONFIRMATION =================
+        # Email confirmation
         if request.user.email:
             send_mail(
                 subject="Donation Submitted Successfully – DonateHub",
@@ -120,10 +123,7 @@ def verify_otp(request, donation_id):
             donation.status = "Picked Up"
             donation.save()
 
-            messages.success(
-                request,
-                "OTP verified. Donation picked up successfully."
-            )
+            messages.success(request, "OTP verified. Donation picked up successfully.")
             return render(request, "success.html")
         else:
             messages.error(request, "Invalid OTP. Please try again.")
@@ -135,7 +135,6 @@ def verify_otp(request, donation_id):
 def ai_category(request):
     description = request.GET.get('description', '').lower()
 
-    # -------- RULE-BASED FALLBACK --------
     fallback = "Household Items"
     if "book" in description:
         fallback = "Books"
@@ -150,7 +149,6 @@ def ai_category(request):
     elif "table" in description or "chair" in description:
         fallback = "Furniture"
 
-    # -------- GEMINI AI --------
     try:
         prompt = (
             "Choose ONE category from this list ONLY:\n"
@@ -182,3 +180,29 @@ def ai_category(request):
         print("Gemini failed, using fallback:", e)
 
     return JsonResponse({"category": fallback})
+
+
+# ================= DOWNLOAD RECEIPT (PDF) =================
+@login_required
+def download_receipt(request, donation_id):
+    logger.info(
+        f"[DOWNLOAD-RECEIPT] User {request.user.username} requesting receipt for donation_id={donation_id}"
+    )
+
+    donation = get_object_or_404(Donation, id=donation_id)
+
+    if donation.donor != request.user:
+        return HttpResponseForbidden("You are not authorized to download this receipt.")
+
+    context = {
+        "donation": donation,
+        "donation_id": donation.id,
+        "generated_date": timezone.now(),
+    }
+
+    response = render_to_pdf("receipt.html", context)
+
+    donation.receipt_generated_at = timezone.now()
+    donation.save(update_fields=["receipt_generated_at"])
+
+    return response

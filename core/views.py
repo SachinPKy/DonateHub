@@ -53,14 +53,9 @@ def add_donation(request):
         description = request.POST.get('description')
         pickup_date = request.POST.get('pickup_date')
         amount = request.POST.get('amount')
-<<<<<<< HEAD
         photo = request.FILES.get("photo")
 
-=======
-
-        
-        # ✅ IMPORTANT FIX: handle missing amount
->>>>>>> f7b4d66eb9f0791ea435baec2528837a66bffb89
+        # Handle missing or empty amount
         if not amount or amount.strip() == "":
             amount = Decimal("0.00")
         else:
@@ -71,14 +66,9 @@ def add_donation(request):
             category=category,
             description=description,
             pickup_date=pickup_date,
-<<<<<<< HEAD
             amount=amount,
             status="Pending",
             photo=photo
-=======
-            amount=amount,        # ✅ FIXED
-            status="Pending"
->>>>>>> f7b4d66eb9f0791ea435baec2528837a66bffb89
         )
 
         # Email confirmation
@@ -196,10 +186,6 @@ def ai_category(request):
 # ================= DOWNLOAD RECEIPT (PDF) =================
 @login_required
 def download_receipt(request, donation_id):
-    logger.info(
-        f"[DOWNLOAD-RECEIPT] User {request.user.username} requesting receipt for donation_id={donation_id}"
-    )
-
     donation = get_object_or_404(Donation, id=donation_id)
 
     if donation.donor != request.user:

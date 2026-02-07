@@ -113,11 +113,6 @@ STATICFILES_DIRS = [
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 
-# ================= MEDIA FILES (USER UPLOADS) =================
-MEDIA_URL = '/media/'
-MEDIA_ROOT = BASE_DIR / 'media'
-
-
 # ================= DEFAULT PRIMARY KEY =================
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
@@ -139,4 +134,4 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 
 
 # ================= GEMINI API CONFIG =================
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")        

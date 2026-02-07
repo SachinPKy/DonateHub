@@ -12,7 +12,6 @@
     <link rel="apple-touch-icon" href="{% static 'images/apple-touch-icon.png' %}">
     <link rel="manifest" href="{% static 'site.webmanifest' %}">
 
-    <!-- Bootstrap CSS -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -46,36 +45,6 @@
       .ai-btn {
         font-size: 0.9rem;
       }
-
-      @media (max-width: 576px) {
-        body {
-          padding: 10px;
-        }
-
-        .donation-card {
-          margin: 30px auto;
-          padding: 22px;
-          border-radius: 14px;
-        }
-
-        .donation-title {
-          font-size: 1.35rem;
-        }
-
-        p.text-muted {
-          font-size: 0.9rem;
-        }
-
-        .ai-btn {
-          width: 100%;
-          font-size: 0.85rem;
-        }
-
-        button[type="submit"] {
-          font-size: 1rem;
-          padding: 12px;
-        }
-      }
     </style>
   </head>
 
@@ -89,7 +58,8 @@
           toys, and essential supplies.
         </p>
 
-        <form method="post">
+        <!-- IMPORTANT: enctype added -->
+        <form method="post" enctype="multipart/form-data">
           {% csrf_token %}
 
           <!-- CATEGORY -->
@@ -100,7 +70,6 @@
               class="form-control"
               name="category"
               id="id_category"
-              placeholder="Click AI suggestion or enter manually"
               required
             />
           </div>
@@ -113,7 +82,6 @@
               name="description"
               id="id_description"
               rows="4"
-              placeholder="Example: Old school textbooks and notebooks"
               required
             ></textarea>
 
@@ -125,7 +93,6 @@
               🤖 Suggest Category (AI)
             </button>
 
-            <!-- ADD LOCATION BUTTON -->
             <button
               type="button"
               class="btn btn-warning btn-sm mt-2 ai-btn"
@@ -135,7 +102,7 @@
             </button>
           </div>
 
-          <!-- LOCATION FIELD -->
+          <!-- LOCATION -->
           <div class="mb-3">
             <label class="form-label">Pickup Location</label>
             <input
@@ -143,8 +110,53 @@
               class="form-control"
               name="location"
               id="id_location"
-              placeholder="Click 'Add Location' to select pickup location"
               readonly
+            />
+          </div>
+
+          <!-- ================= PHOTO UPLOAD (NEW) ================= -->
+          <div class="mb-3">
+            <label class="form-label">Upload Item Photo</label>
+
+            <!-- Desktop -->
+            <div
+              id="drop-area"
+              class="border border-2 rounded p-3 text-center"
+              style="border-style: dashed; display: none;"
+            >
+              <p class="mb-1">📂 Drag & drop image here</p>
+              <p class="text-muted">or</p>
+              <label class="btn btn-outline-primary btn-sm">
+                Choose Image
+                <input
+                  type="file"
+                  name="photo"
+                  id="photoInput"
+                  accept="image/*"
+                  hidden
+                />
+              </label>
+            </div>
+
+            <!-- Mobile -->
+            <div id="mobile-upload" style="display: none;">
+              <input
+                type="file"
+                class="form-control"
+                name="photo"
+                id="photoInputMobile"
+                accept="image/*"
+                capture="environment"
+              />
+              <small class="text-muted">
+                Take photo or choose from gallery
+              </small>
+            </div>
+
+            <img
+              id="preview"
+              class="img-fluid mt-3 rounded"
+              style="max-height: 220px; display: none;"
             />
           </div>
 
@@ -159,7 +171,6 @@
             />
           </div>
 
-          <!-- SUBMIT -->
           <button type="submit" class="btn btn-success w-100">
             Submit Donation
           </button>
@@ -167,49 +178,58 @@
       </div>
     </div>
 
-    <!-- ================= AI + LOCATION SCRIPT ================= -->
+    <!-- ================= SCRIPTS ================= -->
     <script>
       function getCategory() {
-        const description = document
-          .getElementById("id_description")
-          .value.trim();
-
-        if (!description) {
-          alert("Please enter a description first.");
-          return;
-        }
-
-        fetch(
-          "{% url 'ai_category' %}?description=" +
-            encodeURIComponent(description)
-        )
-          .then((response) => response.json())
+        const description = document.getElementById("id_description").value;
+        fetch("{% url 'ai_category' %}?description=" + encodeURIComponent(description))
+          .then((res) => res.json())
           .then((data) => {
             document.getElementById("id_category").value = data.category;
-          })
-          .catch(() => {
-            alert("AI service unavailable. Please enter category manually.");
           });
       }
 
       function getLocation() {
-        if (!navigator.geolocation) {
-          alert("Geolocation is not supported by your browser.");
-          return;
-        }
+        navigator.geolocation.getCurrentPosition((pos) => {
+          document.getElementById("id_location").value =
+            "Lat: " + pos.coords.latitude + ", Lng: " + pos.coords.longitude;
+        });
+      }
 
-        navigator.geolocation.getCurrentPosition(
-          (position) => {
-            const lat = position.coords.latitude.toFixed(6);
-            const lon = position.coords.longitude.toFixed(6);
+      /* PHOTO UPLOAD LOGIC */
+      const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
+      const dropArea = document.getElementById("drop-area");
+      const mobileUpload = document.getElementById("mobile-upload");
+      const preview = document.getElementById("preview");
 
-            document.getElementById("id_location").value =
-              "Latitude: " + lat + ", Longitude: " + lon;
-          },
-          () => {
-            alert("Unable to retrieve location. Please allow location access.");
-          }
-        );
+      let input;
+
+      if (isMobile) {
+        mobileUpload.style.display = "block";
+        input = document.getElementById("photoInputMobile");
+      } else {
+        dropArea.style.display = "block";
+        input = document.getElementById("photoInput");
+      }
+
+      input.addEventListener("change", () => {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = () => {
+          preview.src = reader.result;
+          preview.style.display = "block";
+        };
+        reader.readAsDataURL(file);
+      });
+
+      if (!isMobile) {
+        dropArea.addEventListener("dragover", (e) => e.preventDefault());
+        dropArea.addEventListener("drop", (e) => {
+          e.preventDefault();
+          input.files = e.dataTransfer.files;
+          input.dispatchEvent(new Event("change"));
+        });
       }
     </script>
   </body>

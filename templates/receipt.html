@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Donation Receipt - DonateHub</title>
+
+    <style>
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #f5f5f5;
+            padding: 40px;
+            color: #222;
+        }
+
+        .receipt {
+            max-width: 780px;
+            margin: auto;
+            background: #ffffff;
+            padding: 40px;
+            border: 1px solid #ddd;
+        }
+
+        /* HEADER */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            letter-spacing: 0.5px;
+        }
+
+        .header p {
+            margin-top: 6px;
+            font-size: 13px;
+            color: #666;
+        }
+
+        .title {
+            text-align: center;
+            font-size: 20px;
+            font-weight: bold;
+            margin: 25px 0 35px;
+            color: #2e7d32;
+        }
+
+        /* SECTION TITLE */
+        .section-title {
+            font-size: 13px;
+            font-weight: bold;
+            text-transform: uppercase;
+            color: #555;
+            border-bottom: 2px solid #e0e0e0;
+            padding-bottom: 6px;
+            margin-bottom: 15px;
+        }
+
+        /* TABLE */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-bottom: 30px;
+        }
+
+        td {
+            padding: 8px 6px;
+            vertical-align: top;
+            font-size: 14px;
+        }
+
+        td.label {
+            width: 35%;
+            color: #555;
+        }
+
+        td.value {
+            width: 65%;
+            font-weight: 500;
+            color: #111;
+        }
+
+        /* STATUS */
+        .status {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: bold;
+            color: #fff;
+        }
+
+        .pending { background: #f39c12; }
+        .approved { background: #3498db; }
+        .picked { background: #9b59b6; }
+        .delivered { background: #2e7d32; }
+        .rejected { background: #c0392b; }
+
+        /* FOOTER */
+        .footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e0e0e0;
+            font-size: 13px;
+            color: #555;
+        }
+
+        @media print {
+            body {
+                background: white;
+                padding: 0;
+            }
+            .receipt {
+                border: none;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+<div class="receipt">
+
+    <!-- HEADER -->
+    <div class="header">
+        <h1>DonateHub</h1>
+        <p>Making a Difference, One Donation at a Time</p>
+    </div>
+
+    <div class="title">Donation Receipt</div>
+
+    <!-- RECEIPT INFO -->
+    <div class="section-title">Receipt Information</div>
+    <table>
+        <tr>
+            <td class="label">Receipt Number</td>
+            <td class="value">DH-{{ donation.id|stringformat:"06d" }}</td>
+        </tr>
+        <tr>
+            <td class="label">Generated Date</td>
+            <td class="value">{{ generated_date|date:"d M Y, h:i A" }}</td>
+        </tr>
+    </table>
+
+    <!-- DONOR INFO -->
+    <div class="section-title">Donor Information</div>
+    <table>
+        <tr>
+            <td class="label">Donor Name</td>
+            <td class="value">{{ donation.donor.username }}</td>
+        </tr>
+        <tr>
+            <td class="label">Email</td>
+            <td class="value">{{ donation.donor.email|default:"Not provided" }}</td>
+        </tr>
+    </table>
+
+    <!-- DONATION DETAILS -->
+    <div class="section-title">Donation Details</div>
+    <table>
+        <tr>
+            <td class="label">Category</td>
+            <td class="value">{{ donation.category }}</td>
+        </tr>
+        <tr>
+            <td class="label">Description</td>
+            <td class="value">{{ donation.description }}</td>
+        </tr>
+        <tr>
+            <td class="label">Pickup Date</td>
+            <td class="value">{{ donation.pickup_date|date:"d M Y" }}</td>
+        </tr>
+        <tr>
+            <td class="label">Status</td>
+            <td class="value">
+                <span class="status
+                    {% if donation.status == 'Pending' %}pending
+                    {% elif donation.status == 'Approved' %}approved
+                    {% elif donation.status == 'Picked Up' %}picked
+                    {% elif donation.status == 'Delivered' %}delivered
+                    {% elif donation.status == 'Rejected' %}rejected
+                    {% endif %}">
+                    {{ donation.status }}
+                </span>
+            </td>
+        </tr>
+    </table>
+
+    <!-- FOOTER -->
+    <div class="footer">
+        Thank you for your generous donation.<br>
+        This is a system-generated receipt.
+    </div>
+
+</div>
+
+</body>
+</html>

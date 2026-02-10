@@ -130,6 +130,32 @@ class DonationAdmin(admin.ModelAdmin):
     
     actions = [send_otp_action, verify_otp_action]
 
+    def save_model(self, request, obj, form, change):
+        """Override save to update tracking when status changes."""
+        if change:
+            old_obj = Donation.objects.get(pk=obj.pk)
+            if old_obj.status != obj.status:
+                # Status changed - update tracking
+                from django.utils import timezone
+                from .models import DonationTracking
+                tracking, created = DonationTracking.objects.get_or_create(donation=obj)
+                tracking.current_status = obj.status
+                # Set the appropriate timestamp based on new status
+                status_timestamp_map = {
+                    DonationStatus.SUBMITTED: 'submitted_at',
+                    DonationStatus.CONFIRMED: 'confirmed_at',
+                    DonationStatus.PICKUP_SCHEDULED: 'pickup_scheduled_at',
+                    DonationStatus.PICKED_UP: 'picked_up_at',
+                    DonationStatus.IN_TRANSIT: 'in_transit_at',
+                    DonationStatus.DELIVERED: 'delivered_at',
+                    DonationStatus.COMPLETED: 'completed_at',
+                }
+                timestamp_field = status_timestamp_map.get(obj.status)
+                if timestamp_field and not getattr(tracking, timestamp_field):
+                    setattr(tracking, timestamp_field, timezone.now())
+                tracking.save()
+        super().save_model(request, obj, form, change)
+
     def get_urls(self):
         urls = super().get_urls()
         custom_urls = [

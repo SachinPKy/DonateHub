@@ -48,7 +48,8 @@ def add_donation(request):
             donation = form.save(donor=request.user)
             
             # Create tracking record
-            DonationTracking.objects.create(donation=donation)
+            tracking = DonationTracking.objects.create(donation=donation)
+            tracking.save()  # This will set the initial timestamp
             
             # Save multiple images
             images = request.FILES.getlist('images')

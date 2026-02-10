@@ -32,6 +32,7 @@ class Donation(models.Model):
     )
 
     otp = models.CharField(max_length=6, blank=True, null=True)
+    otp_created_at = models.DateTimeField(null=True, blank=True)
     otp_verified = models.BooleanField(default=False)
 
     status = models.CharField(

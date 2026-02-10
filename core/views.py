@@ -8,6 +8,7 @@ from django.utils import timezone
 import logging
 
 from decimal import Decimal
+import random
 import google.generativeai as genai
 
 from .models import Donation
@@ -15,6 +16,12 @@ from .forms import RegisterForm
 from .utils.receipt_pdf import render_to_pdf
 
 logger = logging.getLogger(__name__)
+
+
+# ================= OTP GENERATOR =================
+def generate_otp():
+    """Generate a 6-digit OTP."""
+    return str(random.randint(100000, 999999))
 
 
 # ================= GEMINI CONFIG =================

@@ -223,6 +223,11 @@
       <a href="{% url 'receipt_pdf' donation.id %}" class="btn btn-primary" target="_blank">
         📄 Download Receipt
       </a>
+      {% if donation.otp_verified %}
+      <span class="badge bg-success ms-2" style="font-size: 1rem;">
+        ✓ OTP Verified
+      </span>
+      {% endif %}
     </div>
     
   </div>

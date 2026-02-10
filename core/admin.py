@@ -159,8 +159,16 @@ class DonationAdmin(admin.ModelAdmin):
                         return redirect('/admin/core/donation/')
                 
                 donation.otp_verified = True
+                # Update donation status to PICKED_UP after OTP verification
+                donation.status = DonationStatus.PICKED_UP
                 donation.save()
-                messages.success(request, f"OTP verified successfully for donation #{donation.id}")
+                
+                # Update tracking record
+                from .models import DonationTracking
+                tracking, created = DonationTracking.objects.get_or_create(donation=donation)
+                tracking.save()
+                
+                messages.success(request, f"OTP verified successfully for donation #{donation.id}. Status updated to Picked Up.")
                 return redirect('/admin/core/donation/')
             else:
                 messages.error(request, "Invalid OTP. Please try again.")

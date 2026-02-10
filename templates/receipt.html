@@ -13,7 +13,7 @@
         }
 
         .receipt {
-            max-width: 780px;
+            max-width: 800px;
             margin: auto;
             background: #ffffff;
             padding: 40px;
@@ -55,6 +55,11 @@
             border-bottom: 2px solid #e0e0e0;
             padding-bottom: 6px;
             margin-bottom: 15px;
+            margin-top: 25px;
+        }
+
+        .section-title:first-of-type {
+            margin-top: 0;
         }
 
         /* TABLE */
@@ -92,10 +97,61 @@
         }
 
         .pending { background: #f39c12; }
-        .approved { background: #3498db; }
-        .picked { background: #9b59b6; }
+        .submitted { background: #17a2b8; }
+        .confirmed { background: #6610f2; }
+        .pickup_scheduled { background: #0d6efd; }
+        .picked_up { background: #6c757d; }
+        .in_transit { background: #6c757d; }
         .delivered { background: #2e7d32; }
-        .rejected { background: #c0392b; }
+        .completed { background: #198754; }
+        .cancelled { background: #dc3545; }
+
+        /* LOCATION BOX */
+        .location-box {
+            background: #f8f9fa;
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            margin-bottom: 20px;
+        }
+
+        .location-box .label {
+            font-size: 11px;
+            color: #666;
+            text-transform: uppercase;
+        }
+
+        .location-box .value {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            margin-top: 5px;
+        }
+
+        /* IMAGES SECTION */
+        .images-section {
+            margin-top: 20px;
+        }
+
+        .images-gallery {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+
+        .images-gallery img {
+            width: 100px;
+            height: 100px;
+            object-fit: cover;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+        }
+
+        .no-images {
+            color: #999;
+            font-style: italic;
+            font-size: 13px;
+        }
 
         /* FOOTER */
         .footer {
@@ -136,7 +192,7 @@
     <table>
         <tr>
             <td class="label">Receipt Number</td>
-            <td class="value">DH-{{ donation.id|stringformat:"06d" }}</td>
+            <td class="value">{{ donation.receipt_number|default:"N/A" }}</td>
         </tr>
         <tr>
             <td class="label">Generated Date</td>
@@ -173,25 +229,62 @@
             <td class="value">{{ donation.pickup_date|date:"d M Y" }}</td>
         </tr>
         <tr>
+            <td class="label">Donation Value</td>
+            <td class="value">₹{{ donation.amount|floatformat:2|default:"0.00" }}</td>
+        </tr>
+        <tr>
             <td class="label">Status</td>
             <td class="value">
                 <span class="status
-                    {% if donation.status == 'Pending' %}pending
-                    {% elif donation.status == 'Approved' %}approved
-                    {% elif donation.status == 'Picked Up' %}picked
-                    {% elif donation.status == 'Delivered' %}delivered
-                    {% elif donation.status == 'Rejected' %}rejected
+                    {% if donation.status == 'SUBMITTED' %}submitted
+                    {% elif donation.status == 'CONFIRMED' %}confirmed
+                    {% elif donation.status == 'PICKUP_SCHEDULED' %}pickup_scheduled
+                    {% elif donation.status == 'PICKED_UP' %}picked_up
+                    {% elif donation.status == 'IN_TRANSIT' %}in_transit
+                    {% elif donation.status == 'DELIVERED' %}delivered
+                    {% elif donation.status == 'COMPLETED' %}completed
+                    {% elif donation.status == 'CANCELLED' %}cancelled
                     {% endif %}">
-                    {{ donation.status }}
+                    {{ donation.get_status_display }}
                 </span>
             </td>
         </tr>
     </table>
 
+    <!-- LOCATION -->
+    <div class="section-title">Pickup Location</div>
+    <div class="location-box">
+        <div class="label">Full Address</div>
+        <div class="value">
+            {% if donation.area %}{{ donation.area }}<br>{% endif %}
+            {% if donation.district %}{{ donation.district }}<br>{% endif %}
+            {{ donation.state }} - India
+        </div>
+        {% if donation.pickup_address %}
+        <div class="value" style="margin-top: 10px; font-weight: normal;">
+            {{ donation.pickup_address }}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- IMAGES -->
+    {% if image_urls %}
+    <div class="section-title">Donation Images</div>
+    <div class="images-section">
+        <div class="images-gallery">
+            {% for image_url in image_urls %}
+            <img src="{{ image_url }}" alt="Donation image {{ forloop.counter }}">
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
     <!-- FOOTER -->
     <div class="footer">
         Thank you for your generous donation.<br>
-        This is a system-generated receipt.
+        This is a system-generated receipt.<br>
+        <br>
+        <strong>DonateHub</strong> - Kerala's Trusted Donation Platform
     </div>
 
 </div>

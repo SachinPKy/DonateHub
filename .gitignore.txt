@@ -1,3 +1,49 @@
+# Python
 __pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+ENV/
+*.egg-info/
+dist/
+build/
+
+# Database
 db.sqlite3
+
+# Environment
 .env
+.env.local
+
+# Media uploads (generated content)
+media/
+!media/.gitkeep
+
+# Static files (collectstatic)
+staticfiles/
+static/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+
+# Django
+local_settings.py

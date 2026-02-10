@@ -5,8 +5,10 @@ from .views import (
     add_donation,
     my_donations,
     ai_category,
-    verify_otp,
+    update_status,
     download_receipt,
+    donation_tracking,
+    get_districts_json,
 )
 
 urlpatterns = [
@@ -15,8 +17,14 @@ urlpatterns = [
     path('add/', add_donation, name='add_donation'),
     path('my-donations/', my_donations, name='my_donations'),
 
-    # OTP verification
-    path('verify-otp/<int:donation_id>/', verify_otp, name='verify_otp'),
+    # Donation tracking
+    path('donation/<int:donation_id>/track/', donation_tracking, name='donation_tracking'),
+
+    # Location API - Kerala districts (JSON)
+    path('api/districts/', get_districts_json, name='get_districts_json'),
+
+    # Admin status update
+    path('admin/update-status/<int:donation_id>/', update_status, name='update_status'),
 
     # PDF receipt download
     path('receipt/<int:donation_id>/pdf/', download_receipt, name='receipt_pdf'),

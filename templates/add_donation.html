@@ -12,6 +12,7 @@
     <link rel="apple-touch-icon" href="{% static 'images/apple-touch-icon.png' %}">
     <link rel="manifest" href="{% static 'site.webmanifest' %}">
 
+    <!-- Bootstrap CSS -->
     <link
       href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css"
       rel="stylesheet"
@@ -29,7 +30,7 @@
       }
 
       .donation-card {
-        max-width: 650px;
+        max-width: 700px;
         margin: 70px auto;
         padding: 35px;
         border-radius: 18px;
@@ -45,6 +46,111 @@
       .ai-btn {
         font-size: 0.9rem;
       }
+
+      /* Location section styles */
+      .location-section {
+        background: #f8f9fa;
+        padding: 20px;
+        border-radius: 10px;
+        margin-bottom: 20px;
+      }
+
+      .location-section h6 {
+        color: #0d6efd;
+        margin-bottom: 15px;
+      }
+
+      /* Kerala badge */
+      .kerala-badge {
+        background: #e63946;
+        color: white;
+        padding: 2px 8px;
+        border-radius: 4px;
+        font-size: 0.75rem;
+        font-weight: bold;
+      }
+
+      /* Image upload styles */
+      .image-upload-area {
+        border: 2px dashed #ced4da;
+        border-radius: 10px;
+        padding: 30px;
+        text-align: center;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background: #f8f9fa;
+      }
+
+      .image-upload-area:hover {
+        border-color: #0d6efd;
+        background: #e9ecef;
+      }
+
+      .image-preview {
+        display: inline-block;
+        margin: 10px;
+        position: relative;
+      }
+
+      .image-preview img {
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+        border-radius: 8px;
+        border: 2px solid #dee2e6;
+      }
+
+      .image-preview .remove-btn {
+        position: absolute;
+        top: -8px;
+        right: -8px;
+        background: #dc3545;
+        color: white;
+        border: none;
+        border-radius: 50%;
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+        font-size: 14px;
+        line-height: 1;
+      }
+
+      .loading-spinner {
+        display: none;
+        width: 1rem;
+        height: 1rem;
+        margin-left: 8px;
+      }
+
+      @media (max-width: 576px) {
+        body {
+          padding: 10px;
+        }
+
+        .donation-card {
+          margin: 30px auto;
+          padding: 22px;
+          border-radius: 14px;
+        }
+
+        .donation-title {
+          font-size: 1.35rem;
+        }
+
+        p.text-muted {
+          font-size: 0.9rem;
+        }
+
+        .ai-btn {
+          width: 100%;
+          font-size: 0.85rem;
+        }
+
+        button[type="submit"] {
+          font-size: 1rem;
+          padding: 12px;
+        }
+      }
     </style>
   </head>
 
@@ -58,8 +164,7 @@
           toys, and essential supplies.
         </p>
 
-        <!-- IMPORTANT: enctype added -->
-        <form method="post" enctype="multipart/form-data">
+        <form method="post" enctype="multipart/form-data" id="donationForm">
           {% csrf_token %}
 
           <!-- CATEGORY -->
@@ -70,6 +175,7 @@
               class="form-control"
               name="category"
               id="id_category"
+              placeholder="Click AI suggestion or enter manually"
               required
             />
           </div>
@@ -82,6 +188,7 @@
               name="description"
               id="id_description"
               rows="4"
+              placeholder="Example: Old school textbooks and notebooks"
               required
             ></textarea>
 
@@ -92,72 +199,75 @@
             >
               🤖 Suggest Category (AI)
             </button>
-
-            <button
-              type="button"
-              class="btn btn-warning btn-sm mt-2 ai-btn"
-              onclick="getLocation()"
-            >
-              📍 Add Location
-            </button>
           </div>
 
-          <!-- LOCATION -->
-          <div class="mb-3">
-            <label class="form-label">Pickup Location</label>
-            <input
-              type="text"
-              class="form-control"
-              name="location"
-              id="id_location"
-              readonly
-            />
-          </div>
-
-          <!-- ================= PHOTO UPLOAD (NEW) ================= -->
-          <div class="mb-3">
-            <label class="form-label">Upload Item Photo</label>
-
-            <!-- Desktop -->
-            <div
-              id="drop-area"
-              class="border border-2 rounded p-3 text-center"
-              style="border-style: dashed; display: none;"
-            >
-              <p class="mb-1">📂 Drag & drop image here</p>
-              <p class="text-muted">or</p>
-              <label class="btn btn-outline-primary btn-sm">
-                Choose Image
-                <input
-                  type="file"
-                  name="photo"
-                  id="photoInput"
-                  accept="image/*"
-                  hidden
-                />
-              </label>
-            </div>
-
-            <!-- Mobile -->
-            <div id="mobile-upload" style="display: none;">
+          <!-- ================= LOCATION SECTION (KERALA ONLY) ================= -->
+          <div class="location-section">
+            <h6>📍 Pickup Location <span class="kerala-badge">KERALA ONLY</span></h6>
+            
+            <!-- State (Fixed - Read Only) -->
+            <div class="mb-3">
+              <label class="form-label">State</label>
               <input
-                type="file"
+                type="text"
                 class="form-control"
-                name="photo"
-                id="photoInputMobile"
-                accept="image/*"
-                capture="environment"
+                value="Kerala"
+                readonly
+                style="background-color: #e9ecef;"
               />
-              <small class="text-muted">
-                Take photo or choose from gallery
-              </small>
+              <small class="text-muted">State is fixed to Kerala</small>
+              <input type="hidden" name="state" value="Kerala">
             </div>
 
-            <img
-              id="preview"
-              class="img-fluid mt-3 rounded"
-              style="max-height: 220px; display: none;"
-            />
+            <!-- District Dropdown (14 Kerala Districts) -->
+            <div class="mb-3">
+              <label class="form-label">District</label>
+              <select
+                class="form-select {% if form.district.errors %}is-invalid{% endif %}"
+                name="district"
+                id="id_district"
+              >
+                <option value="">Select District</option>
+                {% for district_value, district_name in districts %}
+                  <option value="{{ district_value }}">{{ district_name }}</option>
+                {% endfor %}
+              </select>
+              {% if form.district.errors %}
+                <div class="invalid-feedback">
+                  {{ form.district.errors.0 }}
+                </div>
+              {% endif %}
+            </div>
+
+            <!-- Area / Locality (Free Text) -->
+            <div class="mb-3">
+              <label class="form-label">Area / Locality</label>
+              <input
+                type="text"
+                class="form-control {% if form.area.errors %}is-invalid{% endif %}"
+                name="area"
+                id="id_area"
+                placeholder="e.g., Technopark, MG Road, Civil Station"
+              />
+              {% if form.area.errors %}
+                <div class="invalid-feedback">
+                  {{ form.area.errors.0 }}
+                </div>
+              {% endif %}
+              <small class="text-muted">Enter your locality, street name, or landmark</small>
+            </div>
+
+            <!-- Address (Optional) -->
+            <div class="mb-3">
+              <label class="form-label">Pickup Address (Optional)</label>
+              <textarea
+                class="form-control"
+                name="pickup_address"
+                id="id_pickup_address"
+                rows="2"
+                placeholder="House number, street, landmark..."
+              ></textarea>
+            </div>
           </div>
 
           <!-- PICKUP DATE -->
@@ -171,6 +281,56 @@
             />
           </div>
 
+          <!-- AMOUNT (Optional) -->
+          <div class="mb-3">
+            <label class="form-label">Donation Value (Optional)</label>
+            <input
+              type="number"
+              class="form-control"
+              name="amount"
+              id="id_amount"
+              step="0.01"
+              min="0"
+              placeholder="Estimated value (₹)"
+            />
+          </div>
+
+          <!-- ================= IMAGE UPLOAD ================= -->
+          <div class="mb-4">
+            <label class="form-label">Upload Images</label>
+            <div class="image-upload-area" onclick="document.getElementById('id_images').click()">
+              <input
+                type="file"
+                class="d-none"
+                id="id_images"
+                name="images"
+                accept="image/*"
+                multiple
+                onchange="previewImages(event)"
+              />
+              <div class="text-muted">
+                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" viewBox="0 0 16 16">
+                  <path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0z"/>
+                  <path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2h-12zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1h12z"/>
+                </svg>
+                <p class="mb-0 mt-2">Click to upload images</p>
+                <small class="text-muted">Up to 5 images (JPG, PNG, GIF). Max 5MB each.</small>
+              </div>
+            </div>
+            
+            <!-- Image Preview Container -->
+            <div id="imagePreviewContainer" class="mt-3" style="display: none;">
+              <div class="d-flex flex-wrap" id="imagePreview"></div>
+            </div>
+            
+            {% if form.images.errors %}
+              <div class="text-danger small mt-1">
+                {{ form.images.errors.0 }}
+              </div>
+            {% endif %}
+          </div>
+
+          <!-- SUBMIT -->
           <button type="submit" class="btn btn-success w-100">
             Submit Donation
           </button>
@@ -178,59 +338,100 @@
       </div>
     </div>
 
-    <!-- ================= SCRIPTS ================= -->
+    <!-- ================= JAVASCRIPT ================= -->
     <script>
+      // AI Category Suggestion
       function getCategory() {
-        const description = document.getElementById("id_description").value;
-        fetch("{% url 'ai_category' %}?description=" + encodeURIComponent(description))
-          .then((res) => res.json())
+        const description = document
+          .getElementById("id_description")
+          .value.trim();
+
+        if (!description) {
+          alert("Please enter a description first.");
+          return;
+        }
+
+        fetch(
+          "{% url 'ai_category' %}?description=" +
+            encodeURIComponent(description)
+        )
+          .then((response) => response.json())
           .then((data) => {
             document.getElementById("id_category").value = data.category;
+          })
+          .catch(() => {
+            alert("AI service unavailable. Please enter category manually.");
           });
       }
 
-      function getLocation() {
-        navigator.geolocation.getCurrentPosition((pos) => {
-          document.getElementById("id_location").value =
-            "Lat: " + pos.coords.latitude + ", Lng: " + pos.coords.longitude;
+      // Image Preview Function
+      function previewImages(event) {
+        const files = event.target.files;
+        const previewContainer = document.getElementById('imagePreviewContainer');
+        const preview = document.getElementById('imagePreview');
+        
+        // Clear previous previews
+        preview.innerHTML = '';
+        
+        if (files.length === 0) {
+          previewContainer.style.display = 'none';
+          return;
+        }
+        
+        previewContainer.style.display = 'block';
+        
+        // Limit to 5 images
+        const maxImages = 5;
+        const filesToShow = Array.from(files).slice(0, maxImages);
+        
+        filesToShow.forEach((file, index) => {
+          if (file.type.startsWith('image/')) {
+            const reader = new FileReader();
+            
+            reader.onload = function(e) {
+              const previewItem = document.createElement('div');
+              previewItem.className = 'image-preview';
+              previewItem.innerHTML = `
+                <img src="${e.target.result}" alt="Preview ${index + 1}">
+                <button type="button" class="remove-btn" onclick="removeImage(this, ${index})">×</button>
+              `;
+              preview.appendChild(previewItem);
+            }
+            
+            reader.readAsDataURL(file);
+          }
         });
+        
+        // Show message if there are more images
+        if (files.length > maxImages) {
+          alert(`Only showing first ${maxImages} images. ${files.length - maxImages} more will be uploaded.`);
+        }
       }
 
-      /* PHOTO UPLOAD LOGIC */
-      const isMobile = /Android|iPhone|iPad/i.test(navigator.userAgent);
-      const dropArea = document.getElementById("drop-area");
-      const mobileUpload = document.getElementById("mobile-upload");
-      const preview = document.getElementById("preview");
-
-      let input;
-
-      if (isMobile) {
-        mobileUpload.style.display = "block";
-        input = document.getElementById("photoInputMobile");
-      } else {
-        dropArea.style.display = "block";
-        input = document.getElementById("photoInput");
+      // Remove image from preview (doesn't actually remove from file input in this simple version)
+      function removeImage(button, index) {
+        button.parentElement.remove();
       }
 
-      input.addEventListener("change", () => {
-        const file = input.files[0];
-        if (!file) return;
-        const reader = new FileReader();
-        reader.onload = () => {
-          preview.src = reader.result;
-          preview.style.display = "block";
-        };
-        reader.readAsDataURL(file);
-      });
-
-      if (!isMobile) {
-        dropArea.addEventListener("dragover", (e) => e.preventDefault());
-        dropArea.addEventListener("drop", (e) => {
+      // Form validation
+      document.getElementById('donationForm').addEventListener('submit', function(e) {
+        const category = document.getElementById('id_category').value.trim();
+        const description = document.getElementById('id_description').value.trim();
+        
+        if (!category || category.length < 2) {
           e.preventDefault();
-          input.files = e.dataTransfer.files;
-          input.dispatchEvent(new Event("change"));
-        });
-      }
+          alert('Please enter a valid category.');
+          document.getElementById('id_category').focus();
+          return;
+        }
+        
+        if (!description || description.length < 5) {
+          e.preventDefault();
+          alert('Please enter a description (at least 5 characters).');
+          document.getElementById('id_description').focus();
+          return;
+        }
+      });
     </script>
   </body>
 </html>

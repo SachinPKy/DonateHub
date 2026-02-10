@@ -1,6 +1,7 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+<<<<<<< Updated upstream
 from django.http import JsonResponse, HttpResponseForbidden, HttpResponse
 from django.conf import settings
 from django.core.mail import send_mail
@@ -10,33 +11,40 @@ import logging
 
 from .models import Donation, DonationImage, DonationTracking, DonationStatus, KERALA_DISTRICTS
 from .forms import RegisterForm, DonationForm
+=======
+from django.http import JsonResponse, HttpResponseForbidden
+from django.utils import timezone
+from decimal import Decimal
 
-logger = logging.getLogger(__name__)
+from .models import Donation
+from .forms import RegisterForm
+from .utils.receipt_pdf import render_to_pdf
+>>>>>>> Stashed changes
 
+
+<<<<<<< Updated upstream
 
 # ================= HOME =================
+=======
+>>>>>>> Stashed changes
 def home(request):
-    if request.user.is_authenticated and request.user.is_superuser:
-        return redirect('/admin/')
-    return render(request, 'home.html')
+    return render(request, "home.html")
 
 
-# ================= REGISTER =================
 def register(request):
-    if request.user.is_authenticated:
-        return redirect('/')
+    if request.method == "POST":
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("/accounts/login/")
+    else:
+        form = RegisterForm()
+    return render(request, "register.html", {"form": form})
 
-    form = RegisterForm(request.POST or None)
-    if form.is_valid():
-        form.save()
-        return redirect('/accounts/login/')
 
-    return render(request, 'register.html', {'form': form})
-
-
-# ================= ADD DONATION =================
 @login_required
 def add_donation(request):
+<<<<<<< Updated upstream
     """Add new donation with images."""
     if request.user.is_superuser:
         return redirect('/admin/')
@@ -95,11 +103,26 @@ def add_donation(request):
         'districts': KERALA_DISTRICTS,
     }
     return render(request, 'add_donation.html', context)
+=======
+    if request.method == "POST":
+        Donation.objects.create(
+            donor=request.user,
+            category=request.POST.get("category"),
+            description=request.POST.get("description"),
+            pickup_date=request.POST.get("pickup_date"),
+            amount=Decimal(request.POST.get("amount") or 0),
+            photo=request.FILES.get("photo"),
+            status="Pending",
+        )
+        messages.success(request, "Donation added successfully")
+        return redirect("/my-donations/")
+    return render(request, "add_donation.html")
+>>>>>>> Stashed changes
 
 
-# ================= MY DONATIONS =================
 @login_required
 def my_donations(request):
+<<<<<<< Updated upstream
     """Display list of donations for the current user."""
     if request.user.is_superuser:
         return redirect('/admin/')
@@ -266,3 +289,32 @@ def get_districts_json(request):
     """Return list of Kerala districts as JSON."""
     data = [{'id': name, 'name': name} for name, display in KERALA_DISTRICTS]
     return JsonResponse(data)
+=======
+    donations = Donation.objects.filter(donor=request.user)
+    return render(request, "my_donations.html", {"donations": donations})
+
+
+@login_required
+def verify_otp(request, donation_id):
+    donation = get_object_or_404(Donation, id=donation_id)
+    return render(request, "verify_otp.html", {"donation": donation})
+
+
+@login_required
+def download_receipt(request, donation_id):
+    donation = get_object_or_404(Donation, id=donation_id)
+    if donation.donor != request.user:
+        return HttpResponseForbidden()
+
+    response = render_to_pdf(
+        "receipt.html",
+        {"donation": donation, "generated_date": timezone.now()},
+    )
+    donation.receipt_generated_at = timezone.now()
+    donation.save(update_fields=["receipt_generated_at"])
+    return response
+
+
+def ai_category(request):
+    return JsonResponse({"category": "Household Items"})
+>>>>>>> Stashed changes

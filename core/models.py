@@ -1,4 +1,5 @@
 from django.db import models
+<<<<<<< Updated upstream
 from django.contrib.auth.models import User
 from django.utils import timezone
 import uuid
@@ -233,3 +234,29 @@ class DonationTracking(models.Model):
                 'step_number': idx + 1,
             })
         return steps
+=======
+from django.conf import settings
+
+class Donation(models.Model):
+    donor = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
+
+    category = models.CharField(max_length=100)
+    description = models.TextField()
+    pickup_date = models.DateField()
+    amount = models.DecimalField(max_digits=10, decimal_places=2, default=0)
+
+    state = models.CharField(max_length=100, default="Pending")  # 🔥 FIX
+
+    status = models.CharField(max_length=50, default="Pending")
+    photo = models.ImageField(upload_to="donations/", null=True, blank=True)
+
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    otp = models.CharField(max_length=6, null=True, blank=True)
+    otp_verified = models.BooleanField(default=False)
+    receipt_generated_at = models.DateTimeField(null=True, blank=True)
+
+    def __str__(self):
+        return f"{self.category} - {self.donor}"
+>>>>>>> Stashed changes

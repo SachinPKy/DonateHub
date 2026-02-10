@@ -1,18 +1,9 @@
 from django.contrib import admin
-from django.contrib.auth.models import User
 from django.urls import path
-from django.shortcuts import render, redirect, get_object_or_404
+from django.shortcuts import redirect, get_object_or_404
 from django.contrib import messages
 
-from .models import Donation, DonationImage, DonationTracking, DonationStatus
-
-
-# ================= INLINE: Donation Images =================
-class DonationImageInline(admin.TabularInline):
-    model = DonationImage
-    extra = 0
-    readonly_fields = ('uploaded_at',)
-    fields = ('image', 'uploaded_at')
+from .models import Donation
 
 
 # ================= ADMIN ACTION: Send OTP =================
@@ -107,8 +98,6 @@ class DonationAdmin(admin.ModelAdmin):
     list_editable = ('status',)
 
     ordering = ('-created_at',)
-
-    inlines = [DonationImageInline]
 
     actions = [send_otp_action, verify_otp_action]
 

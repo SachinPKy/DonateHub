@@ -47,9 +47,13 @@ def add_donation(request):
         if form.is_valid():
             donation = form.save(donor=request.user)
             
-            # Create tracking record
-            tracking = DonationTracking.objects.create(donation=donation)
-            tracking.save()  # This will set the initial timestamp
+            # Create tracking record with initial timestamp
+            from django.utils import timezone
+            tracking = DonationTracking.objects.create(
+                donation=donation,
+                current_status=DonationStatus.SUBMITTED,
+                submitted_at=timezone.now()
+            )
             
             # Save multiple images
             images = request.FILES.getlist('images')

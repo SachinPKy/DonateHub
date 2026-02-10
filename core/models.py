@@ -97,6 +97,11 @@ class Donation(models.Model):
     area = models.CharField(max_length=200, blank=True, null=True)
     pickup_address = models.TextField(blank=True, null=True)
     
+    # OTP Verification for Pickup/Delivery
+    otp = models.CharField(max_length=6, blank=True, null=True)
+    otp_created_at = models.DateTimeField(null=True, blank=True)
+    otp_verified = models.BooleanField(default=False)
+    
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 

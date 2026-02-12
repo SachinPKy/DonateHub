@@ -6,10 +6,7 @@ from django.db import migrations
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('core', '0002_donation_otp_created_at'),
-        ('core', '0002_donation_otp_fields'),
-        ('core', '0005_alter_donation_receipt_number'),
-        ('core', '0005_donation_receipt_generated_at'),
+        ('core', '0001_initial'),
     ]
 
     operations = [

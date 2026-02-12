@@ -6,35 +6,36 @@ from django.conf import settings
 from django.core.mail import send_mail
 from django.utils import timezone
 from django.template.loader import render_to_string
+from decimal import Decimal
 import logging
 
 from .models import Donation, DonationImage, DonationTracking, DonationStatus, KERALA_DISTRICTS
 from .forms import RegisterForm, DonationForm
-
-logger = logging.getLogger(__name__)
+from .utils.receipt_pdf import render_to_pdf
 
 
 # ================= HOME =================
 def home(request):
+<<<<<<< HEAD
     if request.user.is_authenticated and request.user.is_superuser:
         return redirect('admin_dashboard')
     return render(request, 'home.html')
+=======
+    return render(request, "home.html")
+>>>>>>> f5c6c7805f641b9c6448c6b2ab9ce6760f249b8b
 
 
-# ================= REGISTER =================
 def register(request):
-    if request.user.is_authenticated:
-        return redirect('/')
+    if request.method == "POST":
+        form = RegisterForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect("/accounts/login/")
+    else:
+        form = RegisterForm()
+    return render(request, "register.html", {"form": form})
 
-    form = RegisterForm(request.POST or None)
-    if form.is_valid():
-        form.save()
-        return redirect('/accounts/login/')
 
-    return render(request, 'register.html', {'form': form})
-
-
-# ================= ADD DONATION =================
 @login_required
 def add_donation(request):
     """Add new donation with images."""
@@ -97,7 +98,6 @@ def add_donation(request):
     return render(request, 'add_donation.html', context)
 
 
-# ================= MY DONATIONS =================
 @login_required
 def my_donations(request):
     """Display list of donations for the current user."""
@@ -297,3 +297,9 @@ def get_districts_json(request):
     """Return list of Kerala districts as JSON."""
     data = [{'id': name, 'name': name} for name, display in KERALA_DISTRICTS]
     return JsonResponse(data)
+
+
+@login_required
+def verify_otp(request, donation_id):
+    donation = get_object_or_404(Donation, id=donation_id)
+    return render(request, "verify_otp.html", {"donation": donation})

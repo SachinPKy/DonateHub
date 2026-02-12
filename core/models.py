@@ -1,4 +1,5 @@
 from django.db import models
+from django.conf import settings
 from django.contrib.auth.models import User
 from django.utils import timezone
 import uuid
@@ -222,7 +223,9 @@ class DonationTracking(models.Model):
             status_label = dict(DonationStatus.CHOICES).get(status, status)
             timestamp = getattr(self, f"{status.lower()}_at", None)
             completed = getattr(self, f"{status.lower()}_at", None) is not None
-            is_current = status == self.current_status
+            # Use donation's status for is_current to ensure accuracy
+            donation_status = self.donation.status if self.donation else self.current_status
+            is_current = status == donation_status
             
             steps.append({
                 'status': status,
@@ -233,3 +236,6 @@ class DonationTracking(models.Model):
                 'step_number': idx + 1,
             })
         return steps
+
+
+

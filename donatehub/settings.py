@@ -3,7 +3,7 @@ import os
 from dotenv import load_dotenv
 
 # ================= LOAD ENV =================
-load_dotenv()
+load_dotenv(BASE_DIR / '.env')
 
 # ================= BASE DIRECTORY =================
 BASE_DIR = Path(__file__).resolve().parent.parent

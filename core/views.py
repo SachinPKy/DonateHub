@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 # ================= HOME =================
 def home(request):
     if request.user.is_authenticated and request.user.is_superuser:
-        return redirect('/admin/')
+        return redirect('admin_dashboard')
     return render(request, 'home.html')
 
 
@@ -39,7 +39,7 @@ def register(request):
 def add_donation(request):
     """Add new donation with images."""
     if request.user.is_superuser:
-        return redirect('/admin/')
+        return redirect('admin_dashboard')
 
     form = DonationForm(request.POST or None)
     
@@ -102,7 +102,7 @@ def add_donation(request):
 def my_donations(request):
     """Display list of donations for the current user."""
     if request.user.is_superuser:
-        return redirect('/admin/')
+        return redirect('admin_dashboard')
 
     donations = Donation.objects.filter(donor=request.user).prefetch_related('images')
     return render(request, 'my_donations.html', {'donations': donations})
@@ -188,7 +188,7 @@ def update_status(request, donation_id):
             
             messages.success(request, f"Status updated to {new_status}")
     
-    return redirect('/admin/core/donation/')
+    return redirect('admin_dashboard')
 
 
 # ================= DONATION TRACKING =================
@@ -259,6 +259,37 @@ def download_receipt(request, donation_id):
         response['Content-Disposition'] = f'attachment; filename="receipt_{donation.receipt_number}.html"'
 
     return response
+
+
+# ================= ADMIN DASHBOARD =================
+@login_required
+def admin_dashboard(request):
+    """Custom admin dashboard for managing donations."""
+    if not request.user.is_superuser:
+        return HttpResponseForbidden("Admin access required.")
+    
+    # Get donation statistics
+    total_donations = Donation.objects.count()
+    pending_donations = Donation.objects.filter(status='pending').count()
+    approved_donations = Donation.objects.filter(status='approved').count()
+    completed_donations = Donation.objects.filter(status='completed').count()
+    
+    # Recent donations
+    recent_donations = Donation.objects.prefetch_related('images', 'donor').order_by('-created_at')[:10]
+    
+    # Pending donations for quick action
+    pending_list = Donation.objects.filter(status='pending').prefetch_related('images', 'donor').order_by('-created_at')[:5]
+    
+    context = {
+        'total_donations': total_donations,
+        'pending_donations': pending_donations,
+        'approved_donations': approved_donations,
+        'completed_donations': completed_donations,
+        'recent_donations': recent_donations,
+        'pending_list': pending_list,
+    }
+    
+    return render(request, 'admin/dashboard.html', context)
 
 
 # ================= API: GET DISTRICTS =================

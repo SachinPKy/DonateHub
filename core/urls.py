@@ -9,6 +9,7 @@ from .views import (
     download_receipt,
     donation_tracking,
     get_districts_json,
+    admin_dashboard,
 )
 
 urlpatterns = [
@@ -16,6 +17,9 @@ urlpatterns = [
     path('register/', register, name='register'),
     path('add/', add_donation, name='add_donation'),
     path('my-donations/', my_donations, name='my_donations'),
+
+    # Admin Dashboard
+    path('dashboard/', admin_dashboard, name='admin_dashboard'),
 
     # Donation tracking
     path('donation/<int:donation_id>/track/', donation_tracking, name='donation_tracking'),

@@ -16,13 +16,9 @@ from .utils.receipt_pdf import render_to_pdf
 
 # ================= HOME =================
 def home(request):
-<<<<<<< HEAD
     if request.user.is_authenticated and request.user.is_superuser:
         return redirect('admin_dashboard')
     return render(request, 'home.html')
-=======
-    return render(request, "home.html")
->>>>>>> f5c6c7805f641b9c6448c6b2ab9ce6760f249b8b
 
 
 def register(request):

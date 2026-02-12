@@ -9,6 +9,8 @@ from django.template.loader import render_to_string
 from decimal import Decimal
 import logging
 
+logger = logging.getLogger(__name__)
+
 from .models import Donation, DonationImage, DonationTracking, DonationStatus, KERALA_DISTRICTS
 from .forms import RegisterForm, DonationForm
 from .utils.receipt_pdf import render_to_pdf

@@ -2,11 +2,11 @@ from pathlib import Path
 import os
 from dotenv import load_dotenv
 
-# ================= LOAD ENV =================
-load_dotenv(BASE_DIR / '.env')
-
 # ================= BASE DIRECTORY =================
 BASE_DIR = Path(__file__).resolve().parent.parent
+
+# ================= LOAD ENV =================
+load_dotenv(BASE_DIR / '.env')
 
 
 # ================= SECURITY =================

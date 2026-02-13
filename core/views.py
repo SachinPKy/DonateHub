@@ -268,15 +268,22 @@ def admin_dashboard(request):
     
     # Get donation statistics
     total_donations = Donation.objects.count()
-    pending_donations = Donation.objects.filter(status='pending').count()
-    approved_donations = Donation.objects.filter(status='approved').count()
-    completed_donations = Donation.objects.filter(status='completed').count()
+    # Any non-terminal status is considered "pending" for dashboard purposes
+    pending_donations = Donation.objects.exclude(status__in=DonationStatus.TERMINAL).count()
+    # "Approved" maps to the confirmed state
+    approved_donations = Donation.objects.filter(status=DonationStatus.CONFIRMED).count()
+    # Completed includes both delivered and completed terminal states
+    completed_donations = Donation.objects.filter(
+        status__in=[DonationStatus.DELIVERED, DonationStatus.COMPLETED]
+    ).count()
     
     # Recent donations
     recent_donations = Donation.objects.prefetch_related('images', 'donor').order_by('-created_at')[:10]
     
-    # Pending donations for quick action
-    pending_list = Donation.objects.filter(status='pending').prefetch_related('images', 'donor').order_by('-created_at')[:5]
+    # Pending donations for quick action (exclude terminal states)
+    pending_list = Donation.objects.exclude(status__in=DonationStatus.TERMINAL).prefetch_related(
+        'images', 'donor'
+    ).order_by('-created_at')[:5]
     
     context = {
         'total_donations': total_donations,

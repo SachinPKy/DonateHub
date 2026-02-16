@@ -8,6 +8,7 @@ from django.utils import timezone
 from django.template.loader import render_to_string
 from decimal import Decimal
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -129,19 +130,66 @@ def ai_category(request):
         fallback = "Furniture"
     
     try:
-        import google.generativeai as genai
-        genai.configure(api_key=settings.GEMINI_API_KEY)
-        model = genai.GenerativeModel("models/gemini-2.5-flash")
+        logger.info("Starting Gemini AI category detection...")
+        
+        from google.genai import Client
+        from google.genai import errors as genai_errors
+        from dotenv import load_dotenv
+        from pathlib import Path
+        
+        # Reload .env file directly
+        BASE_DIR = Path(settings.BASE_DIR)
+        load_dotenv(BASE_DIR / '.env', override=True)
+        
+        api_key = os.getenv("GEMINI_API_KEY") or settings.GEMINI_API_KEY
+        if not api_key:
+            logger.error("GEMINI_API_KEY is missing!")
+            raise ValueError("API key not set")
+        
+        logger.info(f"API key: {api_key[:20]}...")
+        
+        # Initialize client with API key
+        client = Client(api_key=api_key)
         
         prompt = (
-            "Choose ONE category from this list ONLY:\n"
+            "Choose ONE category from this list ONLY: "
             "Clothes, Books, Toys, Electronics, Furniture, Footwear, "
-            "Educational Materials, Household Items.\n\n"
-            f"Description: {description}\n"
-            "Return only the category name."
+            "Educational Materials, Household Items. "
+            f"Description: {description}. "
+            "Response: category name only."
         )
         
-        response = model.generate_content(prompt)
+        logger.info("Calling Gemini 2.5 Flash...")
+        try:
+            response = client.models.generate_content(
+                model="gemini-2.5-flash",
+                contents=prompt
+            )
+        except genai_errors.ClientError as api_error:
+            error_msg = str(api_error)
+            logger.error(f"Gemini API ClientError: {error_msg}")
+            # Check for quota errors
+            if "RESOURCE_EXHAUSTED" in error_msg or "quota" in error_msg.lower() or "429" in error_msg:
+                return JsonResponse({
+                    "category": fallback,
+                    "error": "quota_exceeded",
+                    "message": "Daily API quota exceeded. Using fallback categorization."
+                }, status=200)
+            elif "API_KEY_INVALID" in error_msg or "400" in error_msg or "expired" in error_msg.lower():
+                return JsonResponse({
+                    "category": fallback,
+                    "error": "api_key_invalid",
+                    "message": "API key is invalid or expired. Please check the API key."
+                }, status=200)
+            else:
+                return JsonResponse({
+                    "category": fallback,
+                    "error": "api_error",
+                    "message": f"API error: {error_msg[:100]}"
+                }, status=200)
+        
+        logger.info(f"Response: {response.text}")
+        
         ai_text = response.text.lower()
         
         categories = {
@@ -157,10 +205,27 @@ def ai_category(request):
         
         for key, value in categories.items():
             if key in ai_text:
+                logger.info(f"Matched: {key} -> {value}")
                 return JsonResponse({"category": value})
-    
+        
+        logger.info("No keyword match, returning fallback")
+        
     except Exception as e:
-        logger.warning(f"Gemini AI failed: {e}")
+        error_msg = str(e)
+        logger.error(f"Gemini API error: {error_msg}", exc_info=True)
+        # Check for quota errors in general exceptions
+        if "RESOURCE_EXHAUSTED" in error_msg or "quota" in error_msg.lower() or "429" in error_msg:
+            return JsonResponse({
+                "category": fallback,
+                "error": "quota_exceeded",
+                "message": "Daily API quota exceeded. Using fallback categorization."
+            }, status=200)
+        elif "API_KEY_INVALID" in error_msg or "400" in error_msg or "expired" in error_msg.lower():
+            return JsonResponse({
+                "category": fallback,
+                "error": "api_key_invalid",
+                "message": "API key is invalid or expired. Please check the API key."
+            }, status=200)
     
     return JsonResponse({"category": fallback})
 

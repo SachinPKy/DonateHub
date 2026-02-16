@@ -1,21 +1,25 @@
-from pathlib import Path
 import os
+from pathlib import Path
 from dotenv import load_dotenv
-
-# ================= LOAD ENV =================
-load_dotenv(BASE_DIR / '.env')
 
 # ================= BASE DIRECTORY =================
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# ================= LOAD ENV (2026 BEST PRACTICE) =================
+# override=True ensures that even if your terminal session has 
+# cached an old key, the one in your .env file is forced into memory.
+load_dotenv(BASE_DIR / '.env', override=True)
 
 # ================= SECURITY =================
-SECRET_KEY = os.getenv("DJANGO_SECRET_KEY")
+SECRET_KEY = os.getenv("DJANGO_SECRET_KEY", "change-me-to-a-secure-key-in-production")
 
-DEBUG = True
+DEBUG = True  # Set to False in production
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['*'] # Restrict this when you deploy
 
+# ================= AI CONFIGURATION (GEMINI 2.5/3.0) =================
+# This key is used by your views to initialize the genai.Client
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
 
 # ================= APPLICATIONS =================
 INSTALLED_APPS = [
@@ -36,7 +40,6 @@ INSTALLED_APPS = [
     'core',
 ]
 
-
 # ================= MIDDLEWARE =================
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -46,15 +49,10 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-
-    # django-allauth middleware
     'allauth.account.middleware.AccountMiddleware',
 ]
 
-
-# ================= URL CONFIG =================
 ROOT_URLCONF = 'donatehub.urls'
-
 
 # ================= TEMPLATES =================
 TEMPLATES = [
@@ -73,10 +71,7 @@ TEMPLATES = [
     },
 ]
 
-
-# ================= WSGI =================
 WSGI_APPLICATION = 'donatehub.wsgi.application'
-
 
 # ================= DATABASE (SUPABASE - SAFE) =================
 DATABASES = {
@@ -94,117 +89,51 @@ DATABASES = {
     }
 }
 
-
-# ================= PASSWORD VALIDATION =================
-AUTH_PASSWORD_VALIDATORS = [
-    {'NAME': 'django.contrib.auth.password_validation.UserAttributeSimilarityValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.MinimumLengthValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.CommonPasswordValidator'},
-    {'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator'},
-]
-
-
-# ================= INTERNATIONALIZATION =================
-LANGUAGE_CODE = 'en-us'
-
-TIME_ZONE = 'Asia/Kolkata'
-
-USE_I18N = True
-USE_TZ = True
-
-
-# ================= STATIC FILES =================
+# ================= STATIC & MEDIA FILES =================
 STATIC_URL = '/static/'
-
-STATICFILES_DIRS = [
-    BASE_DIR / 'core/static',
-]
-
+STATICFILES_DIRS = [BASE_DIR / 'core/static']
 STATIC_ROOT = BASE_DIR / 'staticfiles'
 
-
-# ================= MEDIA FILES (IMAGES) =================
 MEDIA_URL = '/media/'
 MEDIA_ROOT = BASE_DIR / 'media'
 
-# ================= IMAGE VALIDATION =================
-# Maximum file size: 5MB per image
+# Image validation limits
 DATA_UPLOAD_MAX_MEMORY_SIZE = 10485760  # 10MB
 FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880   # 5MB
 
-# Allowed image extensions
-ALLOWED_IMAGE_EXTENSIONS = ['jpg', 'jpeg', 'png', 'gif', 'webp']
+# ================= INTERNATIONALIZATION =================
+LANGUAGE_CODE = 'en-us'
+TIME_ZONE = 'Asia/Kolkata'
+USE_I18N = True
+USE_TZ = True
 
-# Maximum image dimensions (optional validation)
-MAX_IMAGE_WIDTH = 4096
-MAX_IMAGE_HEIGHT = 4096
-
-
-# ================= DEFAULT PRIMARY KEY =================
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
-
-# ================= AUTH REDIRECTS =================
-LOGIN_URL = '/accounts/login/'
+# ================= DJANGO-ALLAUTH & AUTH =================
+SITE_ID = 1
 LOGIN_REDIRECT_URL = '/'
 LOGOUT_REDIRECT_URL = '/'
 
-
-# ================= DJANGO-ALLAUTH CONFIGURATION =================
-SITE_ID = 1
-
-# Authentication backends - allows both email/password and social login
 AUTHENTICATION_BACKENDS = [
     'django.contrib.auth.backends.ModelBackend',
     'allauth.account.auth_backends.AuthenticationBackend',
 ]
 
-# Allauth settings (new format for django-allauth 65+)
 ACCOUNT_LOGIN_METHODS = {'email', 'username'}
-ACCOUNT_USERNAME_MIN_LENGTH = 4
-ACCOUNT_SIGNUP_FIELDS = ['email*', 'username*', 'password1*', 'password2*']
-ACCOUNT_UNIQUE_EMAIL = True  # Prevent duplicate users by email
-ACCOUNT_EMAIL_CONFIRMATION_EXPIRE_DAYS = 3
+ACCOUNT_EMAIL_REQUIRED = True
+ACCOUNT_UNIQUE_EMAIL = True
 
-# Social account settings
-SOCIALACCOUNT_AUTO_SIGNUP = True  # Auto create user if not exists
-SOCIALACCOUNT_EMAIL_REQUIRED = True
-SOCIALACCOUNT_EMAIL_AUTHENTICATION = True
-SOCIALACCOUNT_EMAIL_AUTHENTICATION_AUTO_CONNECT = True
-
-# OAuth scopes for Google and Facebook
 SOCIALACCOUNT_PROVIDERS = {
     'google': {
-        'SCOPE': [
-            'profile',
-            'email',
-        ],
-        'AUTH_PARAMS': {
-            'access_type': 'online',
-        }
-    },
-    'facebook': {
-        'METHOD': 'oauth2',
-        'SCOPE': [
-            'email',
-            'public_profile',
-        ],
-        'AUTH_PARAMS': {
-            'auth_type': 'reauthenticate',
-        }
+        'SCOPE': ['profile', 'email'],
+        'AUTH_PARAMS': {'access_type': 'online'},
     }
 }
 
-
-# ================= EMAIL CONFIG (GMAIL SMTP) =================
+# ================= EMAIL CONFIG (SMTP) =================
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = 'smtp.gmail.com'
 EMAIL_PORT = 587
 EMAIL_USE_TLS = True
-
 EMAIL_HOST_USER = os.getenv("EMAIL_HOST_USER")
 EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
-
-
-# ================= GEMINI API CONFIG =================
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")        

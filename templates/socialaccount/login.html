@@ -1,0 +1,35 @@
+{% extends "base_auth.html" %}
+{% load i18n %}
+
+{% block head_title %}{% trans "Sign In Via Google" %}{% endblock %}
+
+{% block content %}
+<div class="auth-header">
+    <div class="mb-3">
+        <i class="bi bi-google fs-1 text-danger"></i>
+    </div>
+    <h2>{% trans "Sign In Via Google" %}</h2>
+    <p>{% blocktrans with provider.name as provider %}You are about to sign in using {{ provider }}.{% endblocktrans %}
+    </p>
+</div>
+
+<div class="p-3 bg-light rounded-3 mb-4 text-center">
+    <p class="mb-0 small text-muted">{% trans "Secure login via Google to access all features of DonateHub." %}</p>
+</div>
+
+<form method="post" class="auth-form">
+    {% csrf_token %}
+    <div class="d-grid">
+        <button type="submit" class="btn btn-primary py-3">
+            {% trans "Continue with Google" %}
+            <i class="bi bi-arrow-right ms-2"></i>
+        </button>
+    </div>
+</form>
+
+<div class="auth-footer">
+    <a href="{% url 'account_login' %}" class="auth-link small text-muted">
+        <i class="bi bi-chevron-left me-1"></i> {% trans "Back to Login" %}
+    </a>
+</div>
+{% endblock %}

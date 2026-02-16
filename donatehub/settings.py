@@ -103,7 +103,9 @@ FILE_UPLOAD_MAX_MEMORY_SIZE = 5242880   # 5MB
 
 # ================= INTERNATIONALIZATION =================
 LANGUAGE_CODE = 'en-us'
+
 TIME_ZONE = 'Asia/Kolkata'
+
 USE_I18N = True
 USE_TZ = True
 

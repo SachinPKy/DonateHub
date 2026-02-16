@@ -69,6 +69,13 @@ class Donation(models.Model):
     donor = models.ForeignKey(User, on_delete=models.CASCADE, related_name='donations')
     category = models.CharField(max_length=100)
     description = models.TextField()
+
+    amount = models.DecimalField(
+        max_digits=10,
+        decimal_places=2,
+        default=0
+    )
+
     pickup_date = models.DateField()
     amount = models.DecimalField(max_digits=10, decimal_places=2, null=True, blank=True)
     
@@ -108,6 +115,10 @@ class Donation(models.Model):
 
     class Meta:
         ordering = ['-created_at']
+
+    def generate_otp(self):
+        if not self.otp:
+            self.otp = str(random.randint(100000, 999999))
 
     def __str__(self):
         return f"{self.category} - {self.status}"

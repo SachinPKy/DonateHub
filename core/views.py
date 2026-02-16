@@ -44,6 +44,39 @@ def add_donation(request):
     form = DonationForm(request.POST or None)
     
     if request.method == "POST":
+
+        
+        # ✅ IMPORTANT FIX: handle missing amount
+        if not amount or amount.strip() == "":
+            amount = Decimal("0.00")
+        else:
+            amount = Decimal(amount)
+
+        donation = Donation.objects.create(
+            donor=request.user,
+            category=category,
+            description=description,
+            pickup_date=pickup_date,
+            amount=amount,        # ✅ FIXED
+            status="Pending"
+        )
+
+        # Email confirmation
+        if request.user.email:
+            send_mail(
+                subject="Donation Submitted Successfully – DonateHub",
+                message=(
+                    f"Hello {request.user.username},\n\n"
+                    f"Thank you for your donation.\n\n"
+                    f"Category: {donation.category}\n"
+                    f"Amount: ₹{donation.amount}\n"
+                    f"Pickup Date: {donation.pickup_date}\n\n"
+                    f"Regards,\nDonateHub Team"
+                ),
+                from_email=None,
+                recipient_list=[request.user.email],
+                fail_silently=True,
+=======
         if form.is_valid():
             donation = form.save(donor=request.user)
             
@@ -53,6 +86,7 @@ def add_donation(request):
                 donation=donation,
                 current_status=DonationStatus.SUBMITTED,
                 submitted_at=timezone.now()
+
             )
             
             # Save multiple images

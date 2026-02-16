@@ -1,0 +1,61 @@
+{% extends "base_auth.html" %}
+{% load i18n %}
+{% load account socialaccount %}
+
+{% block head_title %}{% trans "Sign In" %}{% endblock %}
+{% block body_class %}auth-body-login{% endblock %}
+
+{% block content %}
+<div class="auth-header">
+    <h2>Welcome back</h2>
+    <p>Sign in to your account</p>
+</div>
+
+<form class="login auth-form" method="POST" action="{% url 'account_login' %}">
+    {% csrf_token %}
+
+    {% if form.errors %}
+    <div class="alert alert-danger p-2 small">
+        {% for error in form.non_field_errors %}{{ error }}{% endfor %}
+        {% for field in form %}{% for error in field.errors %}{{ error }}{% endfor %}{% endfor %}
+    </div>
+    {% endif %}
+
+    <div class="mb-3">
+        <label for="id_login" class="form-label">Username or Email</label>
+        <input type="text" name="login" class="form-control" id="id_login" required placeholder="Email or username">
+    </div>
+
+    <div class="mb-3">
+        <label for="id_password" class="form-label">Password</label>
+        <div class="password-wrapper">
+            <input type="password" name="password" class="form-control" id="id_password" required
+                placeholder="••••••••">
+            <button type="button" class="password-toggle" onclick="togglePassword('id_password')">
+                <i class="bi bi-eye-slash" id="toggleIcon-id_password"></i>
+            </button>
+        </div>
+    </div>
+
+    <div class="d-flex justify-content-between mb-4">
+        <div class="form-check">
+            <input type="checkbox" name="remember" class="form-check-input" id="id_remember">
+            <label class="form-check-label" for="id_remember">Remember me</label>
+        </div>
+        <a href="{% url 'account_reset_password' %}" class="auth-link small">Forgot?</a>
+    </div>
+
+    <button type="submit" class="btn btn-primary w-100 mb-3">Sign In</button>
+
+    <div class="divider"><span>OR</span></div>
+
+    <a href="{% provider_login_url 'google' %}" class="btn-social mb-3">
+        <i class="bi bi-google"></i>
+        Sign In with Google
+    </a>
+</form>
+
+<div class="auth-footer">
+    <p>Don't have an account? <a href="/register/" class="auth-link">Sign Up</a></p>
+</div>
+{% endblock %}

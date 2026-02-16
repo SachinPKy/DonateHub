@@ -3,15 +3,15 @@
 {% load account socialaccount %}
 
 {% block head_title %}{% trans "Sign Up" %}{% endblock %}
-{% block body_class %}auth-body-register{% endblock %}
+{% block body_class %}auth-body-signup{% endblock %}
 
 {% block content %}
 <div class="auth-header">
-    <h2>Create Account</h2>
-    <p>Join our community today</p>
+    <h2>Join DonateHub</h2>
+    <p>Create your account to start donating</p>
 </div>
 
-<form class="signup auth-form" method="post" action="/register/">
+<form class="signup auth-form" method="post" action="{% url 'account_signup' %}">
     {% csrf_token %}
 
     {% if form.errors %}
@@ -22,29 +22,28 @@
 
     <div class="mb-3">
         <label for="id_username" class="form-label">Username</label>
-        <input type="text" name="username" class="form-control" id="id_username" required
-            placeholder="Choose a username">
+        <input type="text" name="username" class="form-control" id="id_username" required placeholder="Username">
     </div>
 
     <div class="mb-3">
         <label for="id_email" class="form-label">Email Address</label>
-        <input type="email" name="email" class="form-control" id="id_email" required placeholder="name@example.com">
+        <input type="email" name="email" class="form-control" id="id_email" required placeholder="Email Address">
     </div>
 
     <div class="row">
         <div class="col-md-6 mb-3">
             <label for="id_password1" class="form-label">Password</label>
             <input type="password" name="password1" class="form-control" id="id_password1" required
-                placeholder="••••••••">
+                placeholder="Password">
         </div>
         <div class="col-md-6 mb-3">
             <label for="id_password2" class="form-label">Confirm</label>
             <input type="password" name="password2" class="form-control" id="id_password2" required
-                placeholder="••••••••">
+                placeholder="Confirm Password">
         </div>
     </div>
 
-    <button type="submit" class="btn btn-primary w-100 mb-3">Create Account</button>
+    <button type="submit" class="btn btn-primary w-100 mb-3">Sign Up</button>
 
     <div class="divider"><span>OR</span></div>
 

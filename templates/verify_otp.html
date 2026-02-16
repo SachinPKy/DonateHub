@@ -1,29 +1,76 @@
-{% extends "base_auth.html" %}
-{% load i18n %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Verify OTP | DonateHub</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f4f6f8;
+        }
+        .container {
+            width: 400px;
+            margin: 100px auto;
+            padding: 25px;
+            background: #fff;
+            border-radius: 6px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h2 {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        p {
+            margin: 8px 0;
+        }
+        input[type="text"] {
+            width: 100%;
+            padding: 10px;
+            margin-top: 10px;
+            margin-bottom: 15px;
+            font-size: 16px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background: #28a745;
+            color: white;
+            border: none;
+            font-size: 16px;
+            cursor: pointer;
+        }
+        button:hover {
+            background: #218838;
+        }
+        .msg {
+            color: red;
+            text-align: center;
+            margin-bottom: 10px;
+        }
+    </style>
+</head>
+<body>
 
-{% block head_title %}Verify OTP{% endblock %}
+<div class="container">
+    <h2>OTP Verification</h2>
 
-{% block content %}
-<div class="auth-header">
-    <h2>Verify OTP</h2>
-    <p>Enter the 6-digit code sent to your email</p>
+    <p><strong>Category:</strong> {{ donation.category }}</p>
+    <p><strong>Pickup Date:</strong> {{ donation.pickup_date }}</p>
+    <p><strong>Status:</strong> {{ donation.status }}</p>
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="msg">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    <form method="post">
+        {% csrf_token %}
+        <label>Enter OTP</label>
+        <input type="text" name="otp" placeholder="6-digit OTP" required>
+        <button type="submit">Verify OTP</button>
+    </form>
 </div>
 
-<div class="alert alert-info py-2 small mb-3">
-    <strong>Donation Category:</strong> {{ donation.category }}
-</div>
-
-<form method="post" class="auth-form">
-    {% csrf_token %}
-    <div class="mb-4">
-        <label class="form-label text-center d-block">6-Digit Verification Code</label>
-        <input type="text" name="otp" class="form-control text-center fs-4 fw-bold" placeholder="000000" maxlength="6"
-            pattern="\d{6}" required>
-    </div>
-    <button type="submit" class="btn btn-primary w-100 py-3">Verify & Confirm</button>
-</form>
-
-<div class="auth-footer">
-    <p>Didn't receive the code? <a href="#" class="auth-link">Resend</a></p>
-</div>
-{% endblock %}
+</body>
+</html>

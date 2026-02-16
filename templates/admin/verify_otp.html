@@ -1,0 +1,125 @@
+{% extends "admin/base_site.html" %}
+{% load i18n %}
+{% block title %}Verify OTP - Donation #{{ donation.id }}{% endblock %}
+
+{% block extrastyle %}
+<style>
+    .otp-container {
+        max-width: 500px;
+        margin: 40px auto;
+        padding: 30px;
+        background: #fff;
+        border-radius: 8px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    .otp-container h1 {
+        margin-bottom: 20px;
+        color: #417690;
+    }
+    .donation-info {
+        background: #f8f8f8;
+        padding: 15px;
+        border-radius: 5px;
+        margin-bottom: 20px;
+    }
+    .donation-info p {
+        margin: 5px 0;
+    }
+    .form-row {
+        margin: 20px 0;
+    }
+    .form-row label {
+        display: block;
+        margin-bottom: 5px;
+        font-weight: bold;
+    }
+    .form-row input[type="text"] {
+        width: 100%;
+        padding: 10px;
+        font-size: 18px;
+        letter-spacing: 5px;
+        text-align: center;
+        border: 1px solid #ccc;
+        border-radius: 4px;
+    }
+    .submit-row {
+        margin-top: 20px;
+    }
+    .submit-row input[type="submit"] {
+        background: #417690;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-size: 16px;
+    }
+    .submit-row input[type="submit"]:hover {
+        background: #2c6073;
+    }
+    .cancel-link {
+        margin-left: 10px;
+        color: #666;
+    }
+    .error-message {
+        color: #dc3545;
+        background: #f8d7da;
+        padding: 10px;
+        border-radius: 4px;
+        margin-bottom: 15px;
+    }
+    .success-message {
+        color: #155724;
+        background: #d4edda;
+        padding: 10px;
+        border-radius: 4px;
+        margin-bottom: 15px;
+    }
+    .otp-hint {
+        font-size: 12px;
+        color: #666;
+        margin-top: 5px;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="otp-container">
+    <h1>Verify OTP - Donation #{{ donation.id }}</h1>
+    
+    {% if messages %}
+        {% for message in messages %}
+            <div class="{% if message.tags %}{{ message.tags }}{% endif %}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endif %}
+    
+    <div class="donation-info">
+        <p><strong>Donor:</strong> {{ donation.donor.username }}</p>
+        <p><strong>Email:</strong> {{ donation.donor.email }}</p>
+        <p><strong>Category:</strong> {{ donation.category }}</p>
+        <p><strong>Status:</strong> {{ donation.status }}</p>
+        <p><strong>OTP Sent:</strong> {% if donation.otp %}Yes{% else %}No{% endif %}</p>
+        <p><strong>OTP Verified:</strong> {% if donation.otp_verified %}Yes{% else %}No{% endif %}</p>
+    </div>
+    
+    {% if not donation.otp_verified %}
+        <form method="post">
+            {% csrf_token %}
+            <div class="form-row">
+                <label for="otp">Enter OTP:</label>
+                <input type="text" name="otp" id="otp" maxlength="6" placeholder="000000" required>
+                <p class="otp-hint">Enter the 6-digit OTP received from the donor.</p>
+            </div>
+            <div class="submit-row">
+                <input type="submit" value="Verify OTP">
+                <a href="/admin/core/donation/" class="cancel-link">Cancel</a>
+            </div>
+        </form>
+    {% else %}
+        <p><strong>OTP has been verified successfully!</strong></p>
+        <p><a href="/admin/core/donation/">Return to Donation List</a></p>
+    {% endif %}
+</div>
+{% endblock %}

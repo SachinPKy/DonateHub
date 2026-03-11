@@ -1,0 +1,138 @@
+.tracking-wrapper {
+    min-height: 100vh;
+    background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%);
+    padding-bottom: 3rem;
+    color: white;
+}
+
+.donation-card {
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 20px;
+    transition: all 0.3s ease;
+}
+
+.donation-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+}
+
+.status-badge {
+    font-size: 0.85rem;
+    font-weight: 600;
+    padding: 6px 16px;
+    border-radius: 50px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+}
+
+.gallery-thumbnail {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 8px;
+    cursor: pointer;
+    border: 2px solid transparent;
+    transition: border-color 0.3s;
+}
+
+.gallery-thumbnail:hover {
+    border-color: #0d6efd;
+}
+
+/* Timeline Styles */
+.tracking-list {
+    position: relative;
+    padding-left: 50px;
+    margin-top: 30px;
+}
+
+.tracking-list::before {
+    content: '';
+    position: absolute;
+    left: 20px;
+    top: 5px;
+    bottom: 5px;
+    width: 3px;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 3px;
+}
+
+.tracking-item {
+    position: relative;
+    padding-bottom: 40px;
+}
+
+.tracking-icon {
+    position: absolute;
+    left: -50px;
+    width: 44px;
+    height: 44px;
+    background: #1a1a2e;
+    border: 3px solid rgba(255, 255, 255, 0.1);
+    border-radius: 14px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 2;
+    color: rgba(255, 255, 255, 0.3);
+    transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.tracking-item.completed .tracking-icon {
+    background: #10b981;
+    border-color: #10b981;
+    color: white;
+    transform: scale(1.1);
+}
+
+.tracking-item.current .tracking-icon {
+    background: #3b82f6;
+    border-color: #3b82f6;
+    color: white;
+    box-shadow: 0 0 20px rgba(59, 130, 246, 0.5);
+    animation: pulse 2s infinite;
+}
+
+@keyframes pulse {
+    0% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0.7);
+    }
+
+    70% {
+        box-shadow: 0 0 0 10px rgba(59, 130, 246, 0);
+    }
+
+    100% {
+        box-shadow: 0 0 0 0 rgba(59, 130, 246, 0);
+    }
+}
+
+.tracking-content {
+    background: rgba(255, 255, 255, 0.03);
+    padding: 20px;
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.05);
+    transition: all 0.3s ease;
+}
+
+.tracking-item.current .tracking-content {
+    background: rgba(59, 130, 246, 0.1);
+    border-color: rgba(59, 130, 246, 0.3);
+}
+
+.tracking-content h6 {
+    font-weight: 700;
+    margin-bottom: 4px;
+    color: white;
+}
+
+.tracking-content p {
+    font-size: 0.85rem;
+    color: rgba(255, 255, 255, 0.5);
+}
+
+.cursor-pointer {
+    cursor: pointer;
+}

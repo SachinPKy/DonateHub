@@ -1,41 +1,54 @@
 /* ================= AUTHENTICATION PAGE STYLES ================= */
 
-/* Body Background - Default (Login uses bg2) */
+/* Body Background - Premium Dark Radial */
 .auth-body {
     min-height: 100vh;
-    background: url('/static/images/bg2.png') no-repeat center center fixed;
-    background-size: cover;
+    background: radial-gradient(circle at center, #1e293b 0%, #0f172a 100%);
+    background-attachment: fixed;
     display: flex;
     align-items: center;
     justify-content: center;
+    color: #ffffff;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
 }
 
-/* Register page uses bg1 */
+/* Register page/Social pages */
 body.auth-body-register,
-body.auth-body-signup {
-    background-image: url('/static/images/bg1.png') !important;
+body.auth-body-signup,
+body.auth-body-social {
+    background: radial-gradient(circle at top right, #1e293b 0%, #020617 100%) !important;
 }
 
-/* Auth Card */
+/* Auth Card - Advanced Glassmorphism */
 .auth-card {
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 16px;
-    padding: 40px 32px;
-    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15);
-    backdrop-filter: blur(10px);
+    background: rgba(255, 255, 255, 0.05);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    border-radius: 24px;
+    padding: 3rem 2.5rem;
+    box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.5);
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+}
+
+.auth-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 35px 60px -15px rgba(0, 0, 0, 0.6);
+    border-color: rgba(255, 255, 255, 0.15);
 }
 
 /* Typography */
 .auth-title {
-    font-size: 28px;
-    font-weight: 700;
-    color: #1a1a2e;
-    margin-bottom: 8px;
+    font-size: 2rem;
+    font-weight: 800;
+    color: #ffffff;
+    margin-bottom: 0.5rem;
+    letter-spacing: -0.025em;
 }
 
 .auth-subtitle {
-    font-size: 15px;
-    color: #6c757d;
+    font-size: 1rem;
+    color: #cbd5e1; /* Increased contrast from #94a3b8 */
     margin-bottom: 0;
 }
 
@@ -96,144 +109,101 @@ body.auth-body-signup {
     padding: 0 16px;
     font-size: 13px;
     font-weight: 600;
-    color: #9ca3af;
+    color: #cbd5e1; /* Increased contrast from #9ca3af */
     text-transform: uppercase;
     letter-spacing: 1px;
 }
 
 /* Form Styles */
 .auth-form .form-control {
-    padding: 12px 16px;
-    font-size: 15px;
-    border-radius: 10px;
-    border: 2px solid #e5e7eb;
-    background-color: #f9fafb;
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    border-radius: 12px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    background-color: rgba(255, 255, 255, 0.03);
+    color: #ffffff;
     transition: all 0.2s ease;
 }
 
 .auth-form .form-control:focus {
-    border-color: #667eea;
-    background-color: #ffffff;
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
+    border-color: #6366f1;
+    background-color: rgba(255, 255, 255, 0.05);
+    box-shadow: 0 0 0 4px rgba(99, 102, 241, 0.2);
+    color: #ffffff;
 }
 
-.auth-form .form-control.is-invalid {
-    border-color: #dc3545;
+.auth-form .form-control::placeholder {
+    color: #64748b;
 }
 
 .auth-form .form-label {
-    font-size: 14px;
+    font-size: 0.875rem;
     font-weight: 600;
-    color: #374151;
-    margin-bottom: 8px;
-}
-
-.auth-form .form-text {
-    font-size: 12px;
-    color: #6b7280;
-    margin-top: 6px;
-}
-
-.auth-form .invalid-feedback {
-    font-size: 13px;
-}
-
-/* Password Input Wrapper */
-.password-input-wrapper {
-    position: relative;
-}
-
-.password-toggle {
-    position: absolute;
-    right: 8px;
-    top: 50%;
-    transform: translateY(-50%);
-    border: none;
-    background: transparent;
-    color: #6b7280;
-    padding: 8px;
-    cursor: pointer;
-    z-index: 10;
-}
-
-.password-toggle:hover {
-    color: #374151;
-}
-
-.password-input-wrapper .form-control {
-    padding-right: 48px;
-}
-
-/* Checkbox */
-.auth-form .form-check-input {
-    width: 18px;
-    height: 18px;
-    border-radius: 4px;
-    border: 2px solid #d1d5db;
-    cursor: pointer;
-}
-
-.auth-form .form-check-input:checked {
-    background-color: #667eea;
-    border-color: #667eea;
-}
-
-.auth-form .form-check-input:focus {
-    box-shadow: 0 0 0 4px rgba(102, 126, 234, 0.1);
-}
-
-.auth-form .form-check-label {
-    font-size: 14px;
-    color: #4b5563;
-    cursor: pointer;
+    color: #e2e8f0;
+    margin-bottom: 0.5rem;
 }
 
 /* Primary Login Button */
 .btn-login {
-    padding: 14px 24px;
-    font-size: 16px;
+    padding: 0.875rem 1.5rem;
+    font-size: 1rem;
     font-weight: 600;
-    border-radius: 10px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
     border: none;
+    color: white;
     transition: all 0.3s ease;
-    box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    box-shadow: 0 4px 15px rgba(79, 70, 229, 0.4);
 }
 
 .btn-login:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-    background: linear-gradient(135deg, #5a6fd6 0%, #6a4190 100%);
-}
-
-.btn-login:active {
-    transform: translateY(0);
+    box-shadow: 0 8px 25px rgba(79, 70, 229, 0.5);
+    background: linear-gradient(135deg, #4f46e5 0%, #4338ca 100%);
 }
 
 /* Auth Links */
 .auth-links {
-    font-size: 14px;
+    font-size: 0.875rem;
+}
+
+/* Secondary Button Custom Style for Dark Background */
+.btn-outline-secondary {
+    color: #cbd5e1 !important;
+    border-color: rgba(255, 255, 255, 0.2) !important;
+    background: transparent;
+}
+
+.btn-outline-secondary:hover {
+    background-color: rgba(255, 255, 255, 0.1) !important;
+    color: #ffffff !important;
+    border-color: rgba(255, 255, 255, 0.4) !important;
 }
 
 .auth-link {
-    color: #6b7280;
+    color: #cbd5e1; /* Increased contrast from #94a3b8 */
     text-decoration: none;
     font-weight: 500;
     transition: color 0.2s ease;
 }
 
 .auth-link:hover {
-    color: #667eea;
+    color: #ffffff;
+}
+
+/* Ensure text-muted is still readable on dark background */
+.auth-links .text-muted {
+    color: #94a3b8 !important;
 }
 
 .auth-link-primary {
-    color: #667eea;
+    color: #818cf8;
     text-decoration: none;
     font-weight: 600;
 }
 
 .auth-link-primary:hover {
-    color: #5a6fd6;
+    color: #a5b4fc;
     text-decoration: underline;
 }
 
@@ -251,11 +221,11 @@ body.auth-body-signup {
         padding: 30px 24px;
         margin: 16px;
     }
-    
+
     .auth-title {
         font-size: 24px;
     }
-    
+
     .btn-social {
         padding: 12px 16px;
         font-size: 14px;
@@ -274,6 +244,7 @@ body.auth-body-signup {
         opacity: 0;
         transform: translateY(20px);
     }
+
     to {
         opacity: 1;
         transform: translateY(0);

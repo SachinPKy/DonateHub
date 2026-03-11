@@ -1,0 +1,15 @@
+body {
+  background:
+      linear-gradient(rgba(0,0,0,0.6), rgba(0,0,0,0.6)),
+      url("/images/bg.png");
+  background-size: cover;
+  background-position: center;
+  background-attachment: fixed;
+  color: white;
+  min-height: 100vh;
+}
+
+/* Reset missing links style from Bootstrap */
+a {
+  text-decoration: none;
+}

@@ -1,0 +1,32 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+
+{% block head_title %}{% trans "Login Cancelled" %} | DonateHub{% endblock %}
+{% block body_class %}auth-body-social{% endblock %}
+
+{% block content %}
+<div class="text-center mb-4">
+    <div class="mb-4">
+        <div class="d-inline-flex align-items-center justify-content-center bg-warning bg-opacity-10 rounded-circle"
+            style="width: 80px; height: 80px;">
+            <i class="bi bi-x-circle text-warning" style="font-size: 3rem;"></i>
+        </div>
+    </div>
+    <h2 class="auth-title">{% trans "Login Cancelled" %}</h2>
+    <p class="auth-subtitle mt-3">
+        {% trans "You decided to cancel the login process. No worries! You can try again whenever you're ready." %}
+    </p>
+</div>
+
+<div class="d-grid gap-3 mt-5">
+    <a href="{% url 'account_login' %}" class="btn btn-primary btn-login btn-lg">
+        <i class="bi bi-arrow-left me-2"></i>{% trans "Back to Login" %}
+    </a>
+</div>
+
+<div class="auth-links text-center mt-4">
+    <p class="auth-link small">
+        {% trans "Need help?" %} <a href="/" class="auth-link-primary">{% trans "Contact Support" %}</a>
+    </p>
+</div>
+{% endblock %}

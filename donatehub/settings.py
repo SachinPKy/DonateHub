@@ -33,12 +33,17 @@ INSTALLED_APPS = [
     'allauth.socialaccount',
     'allauth.socialaccount.providers.google',
 
+    'rest_framework',
+    'rest_framework_simplejwt',
+    'corsheaders',
+
     'core',
 ]
 
 
 # ================= MIDDLEWARE =================
 MIDDLEWARE = [
+    'corsheaders.middleware.CorsMiddleware',
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
@@ -145,9 +150,10 @@ DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 
 # ================= AUTH REDIRECTS =================
-LOGIN_URL = '/accounts/login/'
-LOGIN_REDIRECT_URL = '/'
-LOGOUT_REDIRECT_URL = '/'
+FRONTEND_URL = "http://localhost:5173"
+LOGIN_URL = f'{FRONTEND_URL}/login'
+LOGIN_REDIRECT_URL = FRONTEND_URL
+LOGOUT_REDIRECT_URL = f'{FRONTEND_URL}/login'
 
 
 # ================= DJANGO-ALLAUTH CONFIGURATION =================
@@ -207,4 +213,29 @@ EMAIL_HOST_PASSWORD = os.getenv("EMAIL_HOST_PASSWORD")
 
 
 # ================= GEMINI API CONFIG =================
-GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")        
+GEMINI_API_KEY = os.getenv("GEMINI_API_KEY")
+
+# ================= CORS CONFIG =================
+CORS_ALLOWED_ORIGINS = [
+    "http://localhost:5173",
+    "http://127.0.0.1:5173",
+]
+CORS_ALLOW_CREDENTIALS = True
+
+# ================= REST FRAMEWORK CONFIG =================
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework_simplejwt.authentication.JWTAuthentication',
+    ),
+    'DEFAULT_PERMISSION_CLASSES': (
+        'rest_framework.permissions.IsAuthenticated',
+    ),
+}
+
+from datetime import timedelta
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
+    'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
+    'ROTATE_REFRESH_TOKENS': False,
+    'BLACKLIST_AFTER_ROTATION': True,
+}

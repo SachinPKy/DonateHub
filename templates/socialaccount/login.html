@@ -1,0 +1,39 @@
+{% extends "account/base.html" %}
+{% load i18n %}
+
+{% block head_title %}{% trans "Sign In" %} | DonateHub{% endblock %}
+{% block body_class %}auth-body-login{% endblock %}
+
+{% block content %}
+<div class="text-center mb-4">
+    <div class="mb-3">
+        <i class="bi bi-google" style="font-size: 3rem; color: #DB4437;"></i>
+    </div>
+    <h2 class="auth-title">
+        {% if process == "connect" %}
+        Connect with Google
+        {% else %}
+        Sign in with Google
+        {% endif %}
+    </h2>
+    <p class="auth-subtitle mt-3">
+        {% if process == "connect" %}
+        Click continue to connect your Google account to DonateHub.
+        {% else %}
+        Click continue to securely sign in to DonateHub using Google.
+        {% endif %}
+    </p>
+</div>
+
+<form method="post" class="auth-form mt-4">
+    {% csrf_token %}
+    <div class="d-grid gap-2">
+        <button type="submit" class="btn btn-primary btn-login btn-lg">
+            {% trans "Continue" %}
+        </button>
+        <a href="{% url 'account_login' %}" class="btn btn-outline-secondary">
+            {% trans "Cancel" %}
+        </a>
+    </div>
+</form>
+{% endblock %}

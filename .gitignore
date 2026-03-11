@@ -48,3 +48,15 @@ media/
 
 # Logs
 *.log
+
+# Node
+node_modules/
+npm-run-path/
+dist/
+build/
+.npm
+.eslintcache
+
+# Production
+/build
+/dist

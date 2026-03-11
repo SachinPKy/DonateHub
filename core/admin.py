@@ -1,5 +1,10 @@
 from django.contrib import admin
 from django.contrib.auth.models import User
+
+# Customizing Django Admin branding
+admin.site.site_header = "DonateHub Administration"
+admin.site.site_title = "DonateHub Admin Portal"
+admin.site.index_title = "Welcome to DonateHub Administration"
 from django.urls import path
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages

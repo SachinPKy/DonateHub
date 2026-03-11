@@ -18,92 +18,29 @@ from .utils.receipt_pdf import render_to_pdf
 
 # ================= HOME =================
 def home(request):
-    if request.user.is_authenticated and request.user.is_superuser:
-        return redirect('admin_dashboard')
-    return render(request, 'home.html')
+    return redirect(settings.FRONTEND_URL)
 
 
 def register(request):
-    if request.method == "POST":
-        form = RegisterForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect("/accounts/login/")
-    else:
-        form = RegisterForm()
-    return render(request, "register.html", {"form": form})
+    return redirect(f"{settings.FRONTEND_URL}/register")
+
+
+def social_login_cancelled(request):
+    return redirect(f"{settings.FRONTEND_URL}/login?error=cancelled")
+
+
+def social_login_error(request):
+    return redirect(f"{settings.FRONTEND_URL}/login?error=auth_failed")
 
 
 @login_required
 def add_donation(request):
-    """Add new donation with images."""
-    if request.user.is_superuser:
-        return redirect('admin_dashboard')
-
-    form = DonationForm(request.POST or None)
-    
-    if request.method == "POST":
-        if form.is_valid():
-            donation = form.save(donor=request.user)
-            
-            # Create tracking record with initial timestamp
-            from django.utils import timezone
-            tracking = DonationTracking.objects.create(
-                donation=donation,
-                current_status=DonationStatus.SUBMITTED,
-                submitted_at=timezone.now()
-            )
-            
-            # Save multiple images
-            images = request.FILES.getlist('images')
-            for image in images:
-                if image.content_type.startswith('image/'):
-                    if image.size <= 5 * 1024 * 1024:  # 5MB limit
-                        DonationImage.objects.create(donation=donation, image=image)
-            
-            # Email confirmation
-            if request.user.email:
-                try:
-                    send_mail(
-                        subject="Donation Submitted Successfully - DonateHub",
-                        message=(
-                            f"Hello {request.user.username},\n\n"
-                            f"Thank you for your donation.\n\n"
-                            f"Category: {donation.category}\n"
-                            f"Amount: ₹{donation.amount or 0}\n"
-                            f"Location: {donation.get_location_display()}\n"
-                            f"Pickup Date: {donation.pickup_date}\n"
-                            f"Receipt: {donation.receipt_number}\n\n"
-                            f"Track your donation at: {request.build_absolute_uri('/donation/' + str(donation.id) + '/track/')}\n\n"
-                            f"Regards,\nDonateHub Team"
-                        ),
-                        from_email=None,
-                        recipient_list=[request.user.email],
-                        fail_silently=True,
-                    )
-                except Exception:
-                    pass
-            
-            messages.success(request, "Donation added successfully!")
-            return redirect('/my-donations/')
-        else:
-            messages.error(request, "Please correct the errors below.")
-
-    context = {
-        'form': form,
-        'districts': KERALA_DISTRICTS,
-    }
-    return render(request, 'add_donation.html', context)
+    return redirect(f"{settings.FRONTEND_URL}/add")
 
 
 @login_required
 def my_donations(request):
-    """Display list of donations for the current user."""
-    if request.user.is_superuser:
-        return redirect('admin_dashboard')
-
-    donations = Donation.objects.filter(donor=request.user).prefetch_related('images')
-    return render(request, 'my_donations.html', {'donations': donations})
+    return redirect(f"{settings.FRONTEND_URL}/my-donations")
 
 
 # ================= AI CATEGORY =================
@@ -192,28 +129,7 @@ def update_status(request, donation_id):
 # ================= DONATION TRACKING =================
 @login_required
 def donation_tracking(request, donation_id):
-    """Display donation tracking timeline."""
-    donation = get_object_or_404(
-        Donation.objects.prefetch_related('images'),
-        id=donation_id
-    )
-    
-    if donation.donor != request.user and not request.user.is_superuser:
-        return HttpResponseForbidden("You are not authorized to view this donation.")
-    
-    tracking, created = DonationTracking.objects.get_or_create(donation=donation)
-    tracking_steps = tracking.get_tracking_steps()
-    progress_percentage = donation.get_progress_percentage()
-    
-    context = {
-        'donation': donation,
-        'tracking': tracking,
-        'tracking_steps': tracking_steps,
-        'progress_percentage': progress_percentage,
-        'districts': KERALA_DISTRICTS,
-    }
-    
-    return render(request, 'donation_tracking.html', context)
+    return redirect(f"{settings.FRONTEND_URL}/tracking/{donation_id}")
 
 
 # ================= DOWNLOAD RECEIPT =================
@@ -262,32 +178,7 @@ def download_receipt(request, donation_id):
 # ================= ADMIN DASHBOARD =================
 @login_required
 def admin_dashboard(request):
-    """Custom admin dashboard for managing donations."""
-    if not request.user.is_superuser:
-        return HttpResponseForbidden("Admin access required.")
-    
-    # Get donation statistics
-    total_donations = Donation.objects.count()
-    pending_donations = Donation.objects.filter(status='pending').count()
-    approved_donations = Donation.objects.filter(status='approved').count()
-    completed_donations = Donation.objects.filter(status='completed').count()
-    
-    # Recent donations
-    recent_donations = Donation.objects.prefetch_related('images', 'donor').order_by('-created_at')[:10]
-    
-    # Pending donations for quick action
-    pending_list = Donation.objects.filter(status='pending').prefetch_related('images', 'donor').order_by('-created_at')[:5]
-    
-    context = {
-        'total_donations': total_donations,
-        'pending_donations': pending_donations,
-        'approved_donations': approved_donations,
-        'completed_donations': completed_donations,
-        'recent_donations': recent_donations,
-        'pending_list': pending_list,
-    }
-    
-    return render(request, 'admin/dashboard.html', context)
+    return redirect(f"{settings.FRONTEND_URL}/admin")
 
 
 # ================= API: GET DISTRICTS =================
@@ -299,5 +190,4 @@ def get_districts_json(request):
 
 @login_required
 def verify_otp(request, donation_id):
-    donation = get_object_or_404(Donation, id=donation_id)
-    return render(request, "verify_otp.html", {"donation": donation})
+    return redirect(f"{settings.FRONTEND_URL}/verify-otp")

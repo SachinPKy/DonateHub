@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #f4f7fa;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: #ffffff;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+        }
+
+        .header {
+            background: linear-gradient(135deg, #6366f1 0%, #4f46e5 100%);
+            padding: 30px;
+            text-align: center;
+            color: white;
+        }
+
+        .content {
+            padding: 40px;
+            color: #1e293b;
+            line-height: 1.6;
+        }
+
+        .otp-box {
+            background: #f8fafc;
+            border: 2px dashed #e2e8f0;
+            border-radius: 12px;
+            padding: 20px;
+            text-align: center;
+            margin: 30px 0;
+        }
+
+        .otp-code {
+            font-size: 32px;
+            font-weight: 700;
+            color: #4f46e5;
+            letter-spacing: 5px;
+        }
+
+        .footer {
+            background: #f8fafc;
+            padding: 20px;
+            text-align: center;
+            font-size: 12px;
+            color: #64748b;
+        }
+
+        .highlight {
+            color: #4f46e5;
+            font-weight: 600;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 style="margin: 0; font-size: 24px;">Donation Verification</h1>
+        </div>
+        <div class="content">
+            <p>Hello <span class="highlight">{{ username }}</span>,</p>
+            <p>A delivery agent is ready to pick up your donation. To proceed with the verification, please use the
+                following One-Time Password (OTP):</p>
+
+            <div class="otp-box">
+                <div class="otp-code">{{ otp }}</div>
+                <p style="margin: 10px 0 0; font-size: 14px; color: #64748b;">Valid for 10 minutes</p>
+            </div>
+
+            <p><strong>Donation Details:</strong><br>
+                <span style="color: #64748b;">Category:</span> {{ category }}<br>
+                <span style="color: #64748b;">Receipt:</span> {{ receipt_number }}
+            </p>
+
+            <p>Please share this code with the delivery agent to confirm the pickup. Do not share this code with anyone
+                else.</p>
+        </div>
+        <div class="footer">
+            <p>&copy; 2025 DonateHub. All rights reserved.</p>
+            <p>Making the world better, one donation at a time.</p>
+        </div>
+    </div>
+</body>
+
+</html>
